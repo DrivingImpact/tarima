@@ -19,11 +19,21 @@ const ACHIEVEMENT_ICONS: Record<string, string> = {
   rocket: "🚀",
 };
 
+// Game modes hidden from the launch build. Achievements tied to these
+// modes are filtered out so users don't see permanently-locked badges.
+// Keep this in sync with the mode picker on /. When a mode returns, drop
+// it from this set.
+const HIDDEN_MODES = new Set(["toque", "barras-infinitas", "generador"]);
+
 export default function PerfilPage() {
   const { progress } = useAppStore();
 
-  const unlocked = progress.achievements.filter((a) => a.unlockedAt !== null);
-  const locked = progress.achievements.filter((a) => a.unlockedAt === null);
+  const visibleAchievements = progress.achievements.filter((a) => {
+    if (a.requirement.type !== "mode") return true;
+    return !HIDDEN_MODES.has(a.requirement.mode ?? "");
+  });
+  const unlocked = visibleAchievements.filter((a) => a.unlockedAt !== null);
+  const locked = visibleAchievements.filter((a) => a.unlockedAt === null);
 
   return (
     <div className="app-screen flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto">
@@ -85,7 +95,7 @@ export default function PerfilPage() {
       </div>
 
       <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted mb-3">
-        Logros ({unlocked.length}/{progress.achievements.length})
+        Logros ({unlocked.length}/{visibleAchievements.length})
       </p>
 
       {unlocked.length > 0 && (

@@ -4,10 +4,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  GameMode,
   Difficulty,
   RhymeScheme,
-  MODE_CONFIG,
 } from "@/lib/types";
 import { useBeatTracks } from "@/lib/use-beat-tracks";
 import { useAppStore } from "@/lib/store";
@@ -27,7 +25,10 @@ export default function Home() {
     recordSessionStart,
   } = useAppStore();
   const BEAT_TRACKS = useBeatTracks();
-  const [selectedMode, setSelectedMode] = useState<GameMode>("clasico");
+  // Mode is hard-coded to clásico while the other three are hidden from the
+  // UI (see the gutted picker below). Restoring the picker also restores
+  // this to `useState` — that's the entire revert.
+  const selectedMode = "clasico" as const;
   const [selectedDifficulty, setSelectedDifficulty] =
     useState<Difficulty>("principiante");
   const [selectedScheme, setSelectedScheme] = useState<RhymeScheme>("AABB");
@@ -146,47 +147,12 @@ export default function Home() {
           )}
         </div>
 
-        {/* Mode selector */}
-        <div className="space-y-3 mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted px-1">
-            Modo
-          </p>
-          {(Object.keys(MODE_CONFIG) as GameMode[]).map((mode) => {
-            const cfg = MODE_CONFIG[mode];
-            const selected = selectedMode === mode;
-            return (
-              <button
-                key={mode}
-                onClick={() => setSelectedMode(mode)}
-                className={`w-full p-4 rounded-2xl text-left transition-all card-dark ${
-                  selected ? "card-selected" : "hover:border-white/10"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{cfg.icon}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold uppercase tracking-wide text-sm">
-                        {cfg.label}
-                      </span>
-                      {selected && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/20 text-accent font-bold uppercase">
-                          Elegido
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted mt-0.5">
-                      {cfg.description}
-                    </p>
-                  </div>
-                  {selected && (
-                    <div className="w-3 h-3 rounded-full bg-accent animate-glow-pulse" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {/* Mode selector — temporarily hidden (2026-05-25).
+            Only Clásico is exposed for the soft-launch; toque, generador,
+            and barras-infinitas stay wired in the engine + types so a
+            one-line revert here brings them back. `selectedMode` defaults
+            to 'clasico' in component state, so removing the picker is the
+            full extent of the change. */}
 
         {/* Stats */}
         {progress.totalSessions > 0 && (
