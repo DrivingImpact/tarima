@@ -153,8 +153,19 @@ export default function JuegoPage() {
   }, [bufferReady, startRAF, rerender]);
 
   // Re-anchor: "right now is beat 1". Persists per-track in localStorage.
+  // Advanced action — surfaced only via the R key + long-press on the
+  // restart button (which is a tap target most users will already reach for).
   const handleResync = useCallback(() => {
     clockRef.current?.resync();
+    lastBarRef.current = 0;
+    rerender();
+  }, [rerender]);
+
+  // Restart the song from the top of the buffer. The most-requested gesture
+  // — when a verse goes off the rails, you want to start over without
+  // exiting the session.
+  const handleRestart = useCallback(() => {
+    clockRef.current?.seekTo(0);
     lastBarRef.current = 0;
     rerender();
   }, [rerender]);
@@ -275,7 +286,11 @@ export default function JuegoPage() {
           break;
         case "KeyR":
           e.preventDefault();
-          handleResync();
+          // Shift+R = resync (re-anchor beat 1); plain R = restart the song.
+          // Restart is the much more common user need, so it claims the
+          // bare key; resync hides behind a modifier.
+          if (e.shiftKey) handleResync();
+          else handleRestart();
           break;
         case "Escape":
           e.preventDefault();
@@ -291,7 +306,7 @@ export default function JuegoPage() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [showCountdown, showSummary, game.isPaused, handleSkip, handleResync, handleStop, handleTap, isTap]);
+  }, [showCountdown, showSummary, game.isPaused, handleSkip, handleResync, handleRestart, handleStop, handleTap, isTap]);
 
   useEffect(() => {
     if (!game.isPlaying && !showCountdown && !showSummary) {
@@ -428,19 +443,18 @@ export default function JuegoPage() {
 
         <div className="flex items-center gap-2">
           {bufferReady && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleResync();
-              }}
-              title="Pulsa en el beat 1 para sincronizar"
+            <LongPressButton
+              onTap={handleRestart}
+              onLongPress={handleResync}
+              title="Reiniciar (R)  ·  Mantén pulsado para resincronizar"
               className="w-10 h-10 rounded-full card-dark flex items-center justify-center text-muted hover:text-gold transition-colors"
+              ariaLabel="Reiniciar canción"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 12a9 9 0 1 1-3-6.7" />
                 <polyline points="21 4 21 10 15 10" />
               </svg>
-            </button>
+            </LongPressButton>
           )}
           <button
             onClick={(e) => {
@@ -584,7 +598,70 @@ export default function JuegoPage() {
   );
 }
 
-// ─── Transport — skip forward/back + scrubbable progress bar ──
+// ─── LongPressButton — distinguishes tap vs hold ──────────────────
+// Tap fires `onTap`; holding past `longPressMs` (default 500 ms) fires
+// `onLongPress` and suppresses the tap. Used so the header "restart" button
+// can also expose the rarer "resync to beat 1" without taking up screen
+// real-estate for a second control.
+function LongPressButton({
+  onTap,
+  onLongPress,
+  longPressMs = 500,
+  children,
+  className,
+  title,
+  ariaLabel,
+}: {
+  onTap: () => void;
+  onLongPress: () => void;
+  longPressMs?: number;
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+  ariaLabel?: string;
+}) {
+  const timer = useRef<number | null>(null);
+  const fired = useRef(false);
+
+  const start = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    fired.current = false;
+    timer.current = window.setTimeout(() => {
+      fired.current = true;
+      onLongPress();
+    }, longPressMs);
+  };
+  const cancel = () => {
+    if (timer.current !== null) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  };
+  const end = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    cancel();
+    if (!fired.current) onTap();
+  };
+
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={ariaLabel}
+      className={className}
+      onPointerDown={start}
+      onPointerUp={end}
+      onPointerLeave={cancel}
+      onPointerCancel={cancel}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ─── Transport — skip forward/back + draggable progress bar ──
+// Two-row layout on narrow screens (time labels above the bar, skip
+// buttons beside it) so an "00:47 / 01:36" pair never overlaps the bar.
 function Transport({
   clock,
   onSkip,
@@ -595,15 +672,21 @@ function Transport({
   onSeekTo: (seconds: number) => void;
 }) {
   const [, force] = useState(0);
+  const barRef = useRef<HTMLDivElement | null>(null);
+  // While the user is dragging, freeze the displayed position to the
+  // drag value (otherwise the 4 Hz refresh from below would yank the
+  // thumb away from the finger).
+  const [dragSec, setDragSec] = useState<number | null>(null);
 
-  // Local 4Hz refresh so the progress bar moves
+  // Local 4 Hz refresh so the progress bar advances with the audio.
   useEffect(() => {
     const t = setInterval(() => force((x) => x + 1), 250);
     return () => clearInterval(t);
   }, []);
 
-  const cur = clock?.getCurrentTime() ?? 0;
   const dur = clock?.getDuration() ?? 0;
+  const liveCur = clock?.getCurrentTime() ?? 0;
+  const cur = dragSec !== null ? dragSec : liveCur;
   const pct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
   const fmt = (s: number) => {
     if (!isFinite(s) || s < 0) s = 0;
@@ -612,56 +695,104 @@ function Transport({
     return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
   };
 
+  const secondsForClientX = (clientX: number): number | null => {
+    const el = barRef.current;
+    if (!el || dur <= 0) return null;
+    const rect = el.getBoundingClientRect();
+    const x = (clientX - rect.left) / rect.width;
+    return Math.max(0, Math.min(dur - 0.1, x * dur));
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const s = secondsForClientX(e.clientX);
+    if (s === null) return;
+    // Capture pointer so drag continues even if the finger leaves the bar.
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragSec(s);
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragSec === null) return;
+    const s = secondsForClientX(e.clientX);
+    if (s !== null) setDragSec(s);
+  };
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragSec === null) return;
+    e.stopPropagation();
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* releasing a never-captured pointer throws on some browsers */
+    }
+    onSeekTo(dragSec);
+    setDragSec(null);
+  };
+
   return (
     <div
-      className="px-4 pt-1 pb-2 flex items-center gap-2 max-w-3xl mx-auto w-full"
+      className="px-4 pt-1 pb-2 flex flex-col gap-1.5 max-w-3xl mx-auto w-full"
       onClick={(e) => e.stopPropagation()}
     >
-      <button
-        onClick={() => onSkip(-10)}
-        title="Retroceder 10s"
-        className="text-muted hover:text-foreground p-1.5 rounded-lg card-dark"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polygon points="11,19 2,12 11,5" fill="currentColor" />
-          <polygon points="22,19 13,12 22,5" fill="currentColor" />
-        </svg>
-      </button>
-
-      <span className="text-[10px] text-muted font-mono w-9 text-right">{fmt(cur)}</span>
-
-      {/* Scrubbable progress bar */}
-      <div
-        className="flex-1 h-2 rounded-full bg-surface relative cursor-pointer"
-        onClick={(e) => {
-          if (!clock || dur <= 0) return;
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width;
-          onSeekTo(Math.max(0, Math.min(dur - 0.1, x * dur)));
-        }}
-      >
-        <div
-          className="absolute top-0 left-0 h-2 rounded-full bg-accent"
-          style={{ width: `${pct}%` }}
-        />
-        <div
-          className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gold shadow-[0_0_8px_rgba(255,193,7,0.6)]"
-          style={{ left: `calc(${pct}% - 6px)` }}
-        />
+      {/* Row 1: time labels — outside the bar so the bar always has room */}
+      <div className="flex items-center justify-between text-[10px] text-muted font-mono tabular-nums px-10">
+        <span>{fmt(cur)}</span>
+        <span>{fmt(dur)}</span>
       </div>
 
-      <span className="text-[10px] text-muted font-mono w-9">{fmt(dur)}</span>
+      {/* Row 2: skip buttons + draggable bar */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onSkip(-10)}
+          title="Retroceder 10s"
+          className="text-muted hover:text-foreground p-1.5 rounded-lg card-dark shrink-0"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="11,19 2,12 11,5" fill="currentColor" />
+            <polygon points="22,19 13,12 22,5" fill="currentColor" />
+          </svg>
+        </button>
 
-      <button
-        onClick={() => onSkip(10)}
-        title="Adelantar 10s"
-        className="text-muted hover:text-foreground p-1.5 rounded-lg card-dark"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polygon points="2,5 11,12 2,19" fill="currentColor" />
-          <polygon points="13,5 22,12 13,19" fill="currentColor" />
-        </svg>
-      </button>
+        {/* Scrubbable + draggable progress bar. Padding-y enlarges the touch
+            target while keeping the visible bar slim. */}
+        <div
+          ref={barRef}
+          role="slider"
+          aria-label="Posición de la canción"
+          aria-valuemin={0}
+          aria-valuemax={Math.round(dur)}
+          aria-valuenow={Math.round(cur)}
+          tabIndex={0}
+          className="flex-1 py-3 cursor-pointer touch-none select-none"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        >
+          <div className="h-2 rounded-full bg-surface relative">
+            <div
+              className="absolute top-0 left-0 h-2 rounded-full bg-accent"
+              style={{ width: `${pct}%` }}
+            />
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gold shadow-[0_0_8px_rgba(255,193,7,0.6)] transition-transform ${
+                dragSec !== null ? "scale-125" : ""
+              }`}
+              style={{ left: `calc(${pct}% - 8px)` }}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={() => onSkip(10)}
+          title="Adelantar 10s"
+          className="text-muted hover:text-foreground p-1.5 rounded-lg card-dark shrink-0"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="2,5 11,12 2,19" fill="currentColor" />
+            <polygon points="13,5 22,12 13,19" fill="currentColor" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
