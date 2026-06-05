@@ -139,7 +139,8 @@ export default function ProPage() {
           Sin pausas.
         </h1>
         <p className="text-sm text-muted mt-4 max-w-xs mx-auto">
-          La biblioteca completa, sesiones ilimitadas, todo el flow.
+          Entrenamiento sin límites: sesiones ilimitadas y más variedad de
+          beats para practicar.
         </p>
       </div>
 
