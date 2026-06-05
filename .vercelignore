@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+android
+ios
+assets
+store
+scripts
+*.log
+.vercel

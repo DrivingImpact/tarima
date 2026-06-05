@@ -60,8 +60,11 @@ Música de Pixabay bajo la Licencia de Contenido de Pixabay.
 ## Listing fields
 - Category: Games → Music (or Educational)
 - Tags: freestyle, rap, beats, rima, hip hop
-- Contact email: a brand address (e.g. hola@tarima.app) — NOT personal
-- Privacy policy URL: https://<deployed-domain>/privacy
+- Contact email: a brand address (Nico is setting one up; update SUPPORT_EMAIL
+  in src/lib/config.ts when ready) — NOT personal
+- Privacy policy URL: https://tarima-tau.vercel.app/privacy/  (LIVE)
+- Terms URL: https://tarima-tau.vercel.app/terms/  (LIVE)
+- Web demo / shareable link: https://tarima-tau.vercel.app
 - Content rating: complete the questionnaire (no objectionable content → likely
   PEGI 3 / Everyone). Music has no lyrics/explicit content.
 - Ads: No
