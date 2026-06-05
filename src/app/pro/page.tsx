@@ -18,9 +18,16 @@
  */
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { PRO_PRICE, FREE_DAILY_SESSIONS } from "@/lib/entitlements";
+import {
+  billingAvailable,
+  getProPackages,
+  purchase,
+  restore,
+  type ProPackage,
+} from "@/lib/purchases";
 
 const STRIPE_YEARLY = process.env.NEXT_PUBLIC_STRIPE_YEARLY_URL ?? "";
 const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_URL ?? "";
@@ -33,15 +40,75 @@ export default function ProPage() {
   const isPro = entitlements.isPro;
   const [selectedPlan, setSelectedPlan] = useState<Plan>("yearly");
   const [toast, setToast] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  // Native (Capacitor) only: real Play subscriptions from RevenueCat.
+  const [pkgs, setPkgs] = useState<ProPackage[]>([]);
+  const native = billingAvailable();
 
-  const handleSubscribe = () => {
+  useEffect(() => {
+    if (!native) return;
+    let active = true;
+    void getProPackages().then((p) => {
+      if (active) setPkgs(p);
+    });
+    return () => {
+      active = false;
+    };
+  }, [native]);
+
+  const pkgFor = (plan: Plan): ProPackage | undefined =>
+    pkgs.find((p) => p.period === (plan === "yearly" ? "annual" : "monthly"));
+
+  // Display price: real localized Play price on native, anchor price on web.
+  const priceFor = (plan: Plan): string =>
+    pkgFor(plan)?.priceString ??
+    (plan === "yearly" ? PRO_PRICE.yearly : PRO_PRICE.monthly);
+
+  const flash = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleSubscribe = async () => {
+    // Native: run the real Google Play purchase via RevenueCat.
+    if (native) {
+      const pkg = pkgFor(selectedPlan);
+      if (!pkg) {
+        flash("Planes no disponibles ahora mismo. Probar de nuevo.");
+        return;
+      }
+      setBusy(true);
+      try {
+        const ok = await purchase(pkg);
+        if (ok) setPro(true);
+        else flash("Compra cancelada.");
+      } catch {
+        flash("No se pudo completar la compra. Probar de nuevo.");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+    // Web: Stripe Payment Link if configured, else coming-soon.
     const url = selectedPlan === "yearly" ? STRIPE_YEARLY : STRIPE_MONTHLY;
     if (url) {
       window.location.href = url;
       return;
     }
-    setToast("Pago disponible en el lanzamiento móvil. Te avisamos.");
-    setTimeout(() => setToast(null), 3500);
+    flash("Pago disponible en el lanzamiento móvil. Te avisamos.");
+  };
+
+  const handleRestore = async () => {
+    setBusy(true);
+    try {
+      const ok = await restore();
+      setPro(ok);
+      flash(ok ? "Pro restaurado." : "No hay compras para restaurar.");
+    } catch {
+      flash("No se pudo restaurar. Probar de nuevo.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -108,11 +175,11 @@ export default function ProPage() {
                 <span className="text-lg font-bold uppercase tracking-wide">
                   Anual
                 </span>
-                <span className="text-3xl font-black">{PRO_PRICE.yearly}</span>
+                <span className="text-3xl font-black">{priceFor("yearly")}</span>
               </div>
               <div className="flex items-center justify-between text-xs text-muted">
                 <span>Un pago al año</span>
-                <span>~$1.25 / mes</span>
+                {!native && <span>~$1.25 / mes</span>}
               </div>
             </button>
 
@@ -129,7 +196,7 @@ export default function ProPage() {
                   Mensual
                 </span>
                 <span className="text-3xl font-black">
-                  {PRO_PRICE.monthly}
+                  {priceFor("monthly")}
                 </span>
               </div>
               <div className="text-xs text-muted">Cancela cuando quieras</div>
@@ -138,10 +205,21 @@ export default function ProPage() {
 
           <button
             onClick={handleSubscribe}
-            className="w-full py-4 rounded-2xl btn-primary text-lg font-bold mb-6"
+            disabled={busy}
+            className="w-full py-4 rounded-2xl btn-primary text-lg font-bold mb-3 disabled:opacity-60"
           >
-            Empezar con Pro
+            {busy ? "Procesando…" : "Empezar con Pro"}
           </button>
+
+          {native && (
+            <button
+              onClick={handleRestore}
+              disabled={busy}
+              className="w-full py-2 mb-6 text-xs uppercase tracking-wider text-muted hover:text-foreground transition-colors disabled:opacity-60"
+            >
+              Restaurar compras
+            </button>
+          )}
 
           {/* Value table */}
           <div className="card-dark rounded-2xl p-5 mb-6">
@@ -162,9 +240,14 @@ export default function ProPage() {
           </div>
 
           <p className="text-[10px] text-muted text-center px-4 leading-relaxed">
-            Los precios pueden variar por región. Suscripción se renueva
-            automáticamente; cancela en la configuración de tu cuenta de la
-            tienda.
+            Los precios pueden variar por región. La suscripción se renueva
+            automáticamente; se cancela desde la configuración de la cuenta de
+            la tienda.
+          </p>
+          <p className="text-[10px] text-muted/70 text-center mt-3">
+            <Link href="/privacy" className="hover:text-accent transition-colors">
+              Política de privacidad
+            </Link>
           </p>
 
           {/* Dev-only manual toggle so we can verify Pro paths without a live

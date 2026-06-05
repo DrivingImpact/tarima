@@ -1,5 +1,9 @@
 import type { MetadataRoute } from "next";
 
+// Required so the manifest route is emitted as a static file under
+// `output: "export"` (the Capacitor bundle has no server to generate it).
+export const dynamic = "force-static";
+
 /**
  * PWA manifest. Lets the app be installed to a phone home screen — opens
  * in standalone (no browser chrome), which matters because the home page

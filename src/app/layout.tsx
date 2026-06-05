@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Archivo, JetBrains_Mono } from "next/font/google";
 import { DesktopFrame } from "@/components/DesktopFrame";
+import { PurchasesInit } from "@/components/PurchasesInit";
 import "./globals.css";
 
 // Type system — "Acid Underground":
@@ -61,6 +62,7 @@ export default function RootLayout({
       className={`${archivo.variable} ${anton.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-stage text-foreground">
+        <PurchasesInit />
         <DesktopFrame>{children}</DesktopFrame>
       </body>
     </html>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tarima</string>
+    <string name="title_activity_main">Tarima</string>
+    <string name="package_name">com.tarima.freestyle</string>
+    <string name="custom_url_scheme">com.tarima.freestyle</string>
+</resources>
