@@ -8,6 +8,7 @@ import {
   RhymeScheme,
 } from "@/lib/types";
 import { useBeatTracks } from "@/lib/use-beat-tracks";
+import { useHydrated } from "@/lib/use-hydrated";
 import { useAppStore } from "@/lib/store";
 import { getWordsByDifficulty } from "@/lib/words";
 import { FREE_DAILY_SESSIONS, isBeatLocked } from "@/lib/entitlements";
@@ -39,10 +40,9 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Entitlements depend on persisted state, so the SSR snapshot and the
-  // hydrated client snapshot can disagree. Defer the chip until mount to
+  // hydrated client snapshot can disagree. Defer the chip until hydration to
   // avoid a flash of "6/6" for users who'd already burned their day.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useHydrated();
 
   const isPro = entitlements.isPro;
   const sessionsLeft = isPro
@@ -77,7 +77,7 @@ export default function Home() {
       audioRef.current = a;
       setPreviewingIdx(idx);
     },
-    [previewingIdx]
+    [previewingIdx, BEAT_TRACKS]
   );
 
   const handleStart = () => {
@@ -121,7 +121,7 @@ export default function Home() {
           <div className="mt-3 flex items-center justify-center gap-2">
             <span className="h-px w-6 bg-accent/50" />
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted">
-              Donde se hace el freestyle
+              Donde nace el freestyle
             </p>
             <span className="h-px w-6 bg-accent/50" />
           </div>

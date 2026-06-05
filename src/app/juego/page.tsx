@@ -53,10 +53,16 @@ export default function JuegoPage() {
   // Last bar we acted on. Cross a bar boundary → advance the word that many
   // times (covers tab-away gaps too).
   const lastBarRef = useRef<number>(-1);
-  // Pure-presentation: current beat-in-bar (fractional) and current bar.
-  // Read every RAF tick from `clockRef.current.tick(beatsPerBar)`.
-  const [, force] = useState(0);
-  const rerender = useCallback(() => force((x) => x + 1), []);
+  // Presentation snapshot of the clock — written from the RAF loop and from
+  // imperative handlers, and read during render. We never read the live
+  // `clockRef.current` during render (that's a ref-read violation and can go
+  // stale); the loop pushes the values into state instead.
+  const [view, setView] = useState<{ bar: number; beatInBar: number; bpm: number }>(
+    () => ({ bar: 0, beatInBar: 0, bpm: game.currentBeat?.bpm ?? 90 }),
+  );
+  // Elapsed seconds, ticked by an interval while playing — kept in state so we
+  // never call Date.now() during render.
+  const [elapsed, setElapsed] = useState(0);
 
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdownNum, setCountdownNum] = useState(3);
@@ -70,41 +76,58 @@ export default function JuegoPage() {
   const isGenerator = game.mode === "generador";
   const beatsPerBar = beatsPerBarFor(game.currentBeat?.timeSignature ?? "4/4");
 
-  // Authoritative BPM lives on the clock; surface a snapshot for the header.
-  const bpm = clockRef.current?.getBpm() ?? game.currentBeat?.bpm ?? 90;
+  // Snapshot the clock into `view`. Called from event handlers (after a seek /
+  // resync / start) so the UI reflects the new position immediately, without
+  // waiting for the next RAF frame. Runs in callbacks, never during render.
+  const syncView = useCallback(() => {
+    const clock = clockRef.current;
+    if (!clock) return;
+    const { bar, beatInBar } = clock.tick(beatsPerBar);
+    setView({ bar, beatInBar, bpm: clock.getBpm() });
+  }, [beatsPerBar]);
 
-  // Wall-clock tick for the elapsed timer
+  // Elapsed-timer tick. Interval-driven setState (not a synchronous setState in
+  // the effect body), so no cascading-render warning.
   useEffect(() => {
     if (!game.isPlaying || showCountdown || showSummary) return;
-    const t = setInterval(rerender, 500);
+    const t = setInterval(() => {
+      setElapsed(
+        game.sessionStartTime
+          ? Math.floor((Date.now() - game.sessionStartTime) / 1000)
+          : 0,
+      );
+    }, 500);
     return () => clearInterval(t);
-  }, [game.isPlaying, showCountdown, showSummary, rerender]);
+  }, [game.isPlaying, showCountdown, showSummary, game.sessionStartTime]);
 
   // RAF loop — every frame, read the master clock and advance words on bar
   // boundary crossings. The clock and the audio share AudioContext.currentTime
-  // so the visual playhead can never drift from the drums.
-  const rafLoop = useCallback(() => {
-    rafRef.current = null;
-    const clock = clockRef.current;
-    if (!clock) return;
-    const { bar, playing } = clock.tick(beatsPerBar);
-    if (isAuto && playing && bar > lastBarRef.current && lastBarRef.current >= 0) {
-      const delta = bar - lastBarRef.current;
-      const s = useAppStore.getState();
-      for (let i = 0; i < delta; i++) {
-        s.completeBar();
-        s.advanceWord();
-      }
-    }
-    if (playing) lastBarRef.current = bar;
-    rerender();
-    rafRef.current = requestAnimationFrame(rafLoop);
-  }, [beatsPerBar, isAuto, rerender]);
-
+  // so the visual playhead can never drift from the drums. The loop is a local
+  // function (so it can recurse without a self-referencing useCallback) and
+  // pushes the read into `view` state rather than forcing a blind re-render.
   const startRAF = useCallback(() => {
     if (rafRef.current != null) return;
-    rafRef.current = requestAnimationFrame(rafLoop);
-  }, [rafLoop]);
+    const loop = () => {
+      const clock = clockRef.current;
+      if (!clock) {
+        rafRef.current = null;
+        return;
+      }
+      const { bar, beatInBar, playing } = clock.tick(beatsPerBar);
+      if (isAuto && playing && bar > lastBarRef.current && lastBarRef.current >= 0) {
+        const delta = bar - lastBarRef.current;
+        const s = useAppStore.getState();
+        for (let i = 0; i < delta; i++) {
+          s.completeBar();
+          s.advanceWord();
+        }
+      }
+      if (playing) lastBarRef.current = bar;
+      setView({ bar, beatInBar, bpm: clock.getBpm() });
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+  }, [beatsPerBar, isAuto]);
 
   const stopRAF = useCallback(() => {
     if (rafRef.current != null) {
@@ -122,7 +145,8 @@ export default function JuegoPage() {
     clockRef.current = clock;
     let cancelled = false;
     if (!beat.src) {
-      setLoadError("Beat sin URL — revisa la hoja");
+      // No URL — nothing to load. The error is surfaced via the derived
+      // `errorMsg` in render (no synchronous setState in this effect).
       return;
     }
     clock
@@ -149,8 +173,8 @@ export default function JuegoPage() {
     lastBarRef.current = 0;
     clock.start();
     startRAF();
-    rerender();
-  }, [bufferReady, startRAF, rerender]);
+    syncView();
+  }, [bufferReady, startRAF, syncView]);
 
   // Re-anchor: "right now is beat 1". Persists per-track in localStorage.
   // Advanced action — surfaced only via the R key + long-press on the
@@ -158,8 +182,8 @@ export default function JuegoPage() {
   const handleResync = useCallback(() => {
     clockRef.current?.resync();
     lastBarRef.current = 0;
-    rerender();
-  }, [rerender]);
+    syncView();
+  }, [syncView]);
 
   // Restart the song from the top of the buffer. The most-requested gesture
   // — when a verse goes off the rails, you want to start over without
@@ -167,16 +191,16 @@ export default function JuegoPage() {
   const handleRestart = useCallback(() => {
     clockRef.current?.seekTo(0);
     lastBarRef.current = 0;
-    rerender();
-  }, [rerender]);
+    syncView();
+  }, [syncView]);
 
   const handleSkip = useCallback(
     (seconds: number) => {
       clockRef.current?.seekBy(seconds);
       lastBarRef.current = clockRef.current?.tick(beatsPerBar).bar ?? 0;
-      rerender();
+      syncView();
     },
-    [beatsPerBar, rerender],
+    [beatsPerBar, syncView],
   );
 
 
@@ -188,9 +212,14 @@ export default function JuegoPage() {
     if (countdownNum === 0) {
       if (!bufferReady) return; // hold on ¡DALE! until the buffer is ready
       playBeep(880, 280, 0.35);
-      setShowCountdown(false);
-      startPlaying();
-      return;
+      // Defer the hide + start by one frame so it isn't a synchronous setState
+      // in the effect body (avoids the cascading-render warning). Behaviour is
+      // identical — one rAF tick later the countdown clears and playback begins.
+      const id = requestAnimationFrame(() => {
+        setShowCountdown(false);
+        startPlaying();
+      });
+      return () => cancelAnimationFrame(id);
     }
     playBeep(440, 140, 0.25);
     const t = setTimeout(() => setCountdownNum((c) => c - 1), 800);
@@ -210,16 +239,16 @@ export default function JuegoPage() {
       s.completeBar();
       s.advanceWord();
     }
-    rerender();
-  }, [isTap, beatsPerBar, rerender]);
+    setView((v) => ({ ...v, beatInBar: next % beatsPerBar }));
+  }, [isTap, beatsPerBar]);
 
   const handleNextRound = useCallback(() => {
     const s = useAppStore.getState();
     s.completeBar();
     s.advanceWord();
     tapBeatRef.current = 0;
-    rerender();
-  }, [rerender]);
+    setView((v) => ({ ...v, beatInBar: 0 }));
+  }, []);
 
   const stopAudio = useCallback(() => {
     stopRAF();
@@ -314,11 +343,15 @@ export default function JuegoPage() {
     }
   }, [game.isPlaying, showCountdown, showSummary, router]);
 
-  const elapsed = game.sessionStartTime
-    ? Math.floor((Date.now() - game.sessionStartTime) / 1000)
-    : 0;
+  // `elapsed` is interval-ticked state (see the effect above) — no Date.now()
+  // during render.
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
+  const errorMsg =
+    loadError ??
+    (game.currentBeat && !game.currentBeat.src
+      ? "Beat sin URL — revisa la hoja"
+      : null);
 
   // ─── COUNTDOWN ──
   if (showCountdown) {
@@ -395,13 +428,10 @@ export default function JuegoPage() {
   }
 
   // ─── GAME ──
-  // Compute playhead: which beat in the current bar.
-  //   Auto modes (clásico / barras-infinitas / generador): fractional beat
-  //     from the MusicClock so the playhead glides smoothly with the drums.
-  //   Tap mode: integer beat from the rapper's tap counter.
-  const beatInBar = isTap
-    ? tapBeatRef.current % beatsPerBar
-    : (clockRef.current?.tick(beatsPerBar).beatInBar ?? 0);
+  // Playhead position — which beat in the current bar. Both auto modes (from
+  // the MusicClock) and tap mode (from the rapper's tap counter) write
+  // `view.beatInBar`, so render just reads it (no ref read during render).
+  const beatInBar = view.beatInBar;
 
   // Words queue: bar 0 = current, bars 1..3 = upcoming preview
   const queue: (string | null)[] = Array.from({ length: BARS_VISIBLE }).map(
@@ -430,12 +460,12 @@ export default function JuegoPage() {
         <div className="text-center">
           <p className="font-bold text-sm">{game.currentBeat?.name || "Beat"}</p>
           <p className="text-xs text-muted">
-            {loadError ? (
-              <span className="text-danger">{loadError}</span>
+            {errorMsg ? (
+              <span className="text-danger">{errorMsg}</span>
             ) : !bufferReady ? (
               <span className="text-accent animate-pulse">cargando…</span>
             ) : (
-              `${Math.round(bpm)} BPM`
+              `${Math.round(view.bpm)} BPM`
             )}{" "}
             · {diffConfig.label}
           </p>
@@ -497,12 +527,12 @@ export default function JuegoPage() {
 
       {/* Transport — skip the song forward/back, scrubbable progress */}
       <Transport
-        clock={clockRef.current}
+        clockRef={clockRef}
         onSkip={handleSkip}
         onSeekTo={(seconds) => {
           clockRef.current?.seekTo(seconds);
           lastBarRef.current = clockRef.current?.tick(beatsPerBar).bar ?? 0;
-          rerender();
+          syncView();
         }}
       />
 
@@ -663,29 +693,34 @@ function LongPressButton({
 // Two-row layout on narrow screens (time labels above the bar, skip
 // buttons beside it) so an "00:47 / 01:36" pair never overlaps the bar.
 function Transport({
-  clock,
+  clockRef,
   onSkip,
   onSeekTo,
 }: {
-  clock: MusicClock | null;
+  clockRef: React.RefObject<MusicClock | null>;
   onSkip: (seconds: number) => void;
   onSeekTo: (seconds: number) => void;
 }) {
-  const [, force] = useState(0);
   const barRef = useRef<HTMLDivElement | null>(null);
   // While the user is dragging, freeze the displayed position to the
   // drag value (otherwise the 4 Hz refresh from below would yank the
   // thumb away from the finger).
   const [dragSec, setDragSec] = useState<number | null>(null);
+  // Clock position, sampled on an interval into state — we read the live
+  // `clockRef` inside the interval callback, never during render.
+  const [pos, setPos] = useState<{ cur: number; dur: number }>({ cur: 0, dur: 0 });
 
   // Local 4 Hz refresh so the progress bar advances with the audio.
   useEffect(() => {
-    const t = setInterval(() => force((x) => x + 1), 250);
+    const t = setInterval(() => {
+      const c = clockRef.current;
+      setPos({ cur: c?.getCurrentTime() ?? 0, dur: c?.getDuration() ?? 0 });
+    }, 250);
     return () => clearInterval(t);
-  }, []);
+  }, [clockRef]);
 
-  const dur = clock?.getDuration() ?? 0;
-  const liveCur = clock?.getCurrentTime() ?? 0;
+  const dur = pos.dur;
+  const liveCur = pos.cur;
   const cur = dragSec !== null ? dragSec : liveCur;
   const pct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
   const fmt = (s: number) => {
