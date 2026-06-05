@@ -65,10 +65,10 @@ export default function ProPage() {
 
       {/* Hero */}
       <div className="text-center mb-8">
-        <h1 className="text-5xl font-black uppercase tracking-wide leading-none">
-          <span className="gradient-text">Sin límites.</span>
+        <h1 className="text-6xl font-display uppercase tracking-tight leading-[0.9]">
+          <span className="text-accent">Sin límites.</span>
         </h1>
-        <h1 className="text-5xl font-black uppercase tracking-wide leading-none mt-1">
+        <h1 className="text-6xl font-display uppercase tracking-tight leading-[0.9] mt-1 text-foreground">
           Sin pausas.
         </h1>
         <p className="text-sm text-muted mt-4 max-w-xs mx-auto">
@@ -101,7 +101,7 @@ export default function ProPage() {
                   : "hover:border-white/10"
               }`}
             >
-              <span className="absolute -top-2 right-4 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-accent to-gold text-black">
+              <span className="absolute -top-2 right-4 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent text-[#0a0a0b]">
                 Ahorra {PRO_PRICE.yearlySavingsPct}%
               </span>
               <div className="flex items-baseline justify-between mb-1">

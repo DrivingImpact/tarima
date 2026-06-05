@@ -326,9 +326,9 @@ export default function JuegoPage() {
       <div className="app-screen flex items-center justify-center bg-background">
         <div className="text-center animate-slide-up" key={countdownNum}>
           {countdownNum > 0 ? (
-            <p className="text-9xl font-black gradient-text">{countdownNum}</p>
+            <p className="text-9xl font-display text-accent">{countdownNum}</p>
           ) : (
-            <p className="text-6xl font-black gradient-text">¡DALE!</p>
+            <p className="text-7xl font-display uppercase text-accent">¡DALE!</p>
           )}
         </div>
       </div>
@@ -342,7 +342,7 @@ export default function JuegoPage() {
         <div className="w-full max-w-md animate-slide-up">
           <div className="card-dark rounded-3xl p-6 space-y-6">
             <div className="text-center">
-              <h2 className="text-3xl font-black uppercase gradient-text">
+              <h2 className="text-4xl font-display uppercase text-foreground">
                 Sesión Completa
               </h2>
               <p className="text-muted text-sm mt-1">Buen trabajo 🔥</p>
@@ -354,7 +354,7 @@ export default function JuegoPage() {
                 <p className="text-[10px] text-muted uppercase tracking-wider mt-1">Barras</p>
               </div>
               <div className="card-dark rounded-xl p-4 text-center">
-                <p className="text-3xl font-black text-gold">{game.score}</p>
+                <p className="text-3xl font-black text-foreground">{game.score}</p>
                 <p className="text-[10px] text-muted uppercase tracking-wider mt-1">Puntos</p>
               </div>
               <div className="card-dark rounded-xl p-4 text-center">
@@ -447,7 +447,7 @@ export default function JuegoPage() {
               onTap={handleRestart}
               onLongPress={handleResync}
               title="Reiniciar (R)  ·  Mantén pulsado para resincronizar"
-              className="w-10 h-10 rounded-full card-dark flex items-center justify-center text-muted hover:text-gold transition-colors"
+              className="w-10 h-10 rounded-full card-dark flex items-center justify-center text-muted hover:text-accent transition-colors"
               ariaLabel="Reiniciar canción"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -465,14 +465,14 @@ export default function JuegoPage() {
                 useAppStore.getState().pauseGame();
               }
             }}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-accent glow-pink"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-accent glow-accent"
           >
             {game.isPaused ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#0a0a0b">
                 <polygon points="5,3 19,12 5,21" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#0a0a0b">
                 <rect x="6" y="4" width="4" height="16" rx="1" />
                 <rect x="14" y="4" width="4" height="16" rx="1" />
               </svg>
@@ -513,7 +513,7 @@ export default function JuegoPage() {
           <div className="text-center mb-3 px-2">
             <p
               key={`active-${game.activeWordIndex}`}
-              className="text-gold font-black uppercase tracking-tight animate-word-reveal leading-none break-words"
+              className="text-accent font-display uppercase tracking-tight animate-word-reveal leading-none break-words"
               style={{
                 fontSize: `clamp(2.25rem, ${Math.min(4.5, 28 / Math.max(4, queue[0]?.length ?? 4))}rem, 4rem)`,
               }}
@@ -562,7 +562,7 @@ export default function JuegoPage() {
                 key={b}
                 className={`text-sm font-mono transition-all ${
                   b === beatInBar && !game.isPaused
-                    ? "text-gold font-black scale-125"
+                    ? "text-accent font-black scale-125"
                     : b < beatInBar
                     ? "text-accent/40"
                     : "text-muted/40"
@@ -774,7 +774,7 @@ function Transport({
               style={{ width: `${pct}%` }}
             />
             <div
-              className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gold shadow-[0_0_8px_rgba(255,193,7,0.6)] transition-transform ${
+              className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-accent shadow-[0_0_8px_rgba(198,255,58,0.6)] transition-transform ${
                 dragSec !== null ? "scale-125" : ""
               }`}
               style={{ left: `calc(${pct}% - 8px)` }}
@@ -833,7 +833,7 @@ function Pentagram({
         y={STAFF_TOP - 6}
         width={BAR_W}
         height={STAFF_BOTTOM - STAFF_TOP + 12}
-        fill="rgba(255, 193, 7, 0.06)"
+        fill="rgba(198, 255, 58, 0.06)"
         rx={4}
       />
 
@@ -916,7 +916,7 @@ function Pentagram({
             : barIdx === 2
             ? 0.18
             : 0.1;
-          const fill = isOn ? "#ffc107" : isActiveBar ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.7)";
+          const fill = isOn ? "#c6ff3a" : isActiveBar ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.7)";
           return (
             <g key={`${barIdx}-${b}`} opacity={opacity}>
               <ellipse cx={cx} cy={cy} rx={9} ry={7} fill={fill} transform={`rotate(-20 ${cx} ${cy})`} />
@@ -942,13 +942,13 @@ function Pentagram({
             x2={playheadX}
             y1={STAFF_TOP - 12}
             y2={STAFF_BOTTOM + 12}
-            stroke="#ffc107"
+            stroke="#c6ff3a"
             strokeWidth={2.5}
             opacity={0.9}
           >
             <animate attributeName="opacity" values="0.7;1;0.7" dur="0.4s" repeatCount="indefinite" />
           </line>
-          <circle cx={playheadX} cy={STAFF_TOP - 12} r={5} fill="#ffc107">
+          <circle cx={playheadX} cy={STAFF_TOP - 12} r={5} fill="#c6ff3a">
             <animate attributeName="r" values="4;6;4" dur="0.4s" repeatCount="indefinite" />
           </circle>
         </g>

@@ -23,10 +23,6 @@ function stripAccent(ch: string): string {
   return ACCENT_MAP[ch.toLowerCase()] ?? ch.toLowerCase();
 }
 
-function normalizeChar(ch: string): string {
-  return stripAccent(ch);
-}
-
 /**
  * Normalize Spanish phonetics for comparison (Latin American).
  * - b/v → b

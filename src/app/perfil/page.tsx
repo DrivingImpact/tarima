@@ -51,10 +51,10 @@ export default function PerfilPage() {
       </div>
 
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-black uppercase tracking-wide">
+        <h2 className="text-4xl font-display uppercase tracking-tight text-muted leading-[0.85]">
           Tu
         </h2>
-        <h2 className="text-3xl font-black uppercase tracking-wide gradient-text">
+        <h2 className="text-5xl font-display uppercase tracking-tight text-foreground leading-[0.9]">
           Perfil
         </h2>
       </div>
@@ -69,7 +69,7 @@ export default function PerfilPage() {
           </p>
         </div>
         <div className="card-dark rounded-2xl p-4 text-center">
-          <p className="text-2xl font-black text-gold">
+          <p className="text-2xl font-black text-foreground">
             {progress.totalBars}
           </p>
           <p className="text-[10px] text-muted uppercase tracking-wider mt-1">

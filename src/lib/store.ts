@@ -561,8 +561,8 @@ export const useAppStore = create<AppStore>()(
       updateStreak: () => {
         set((state) => {
           const today = todayStr();
-          let { currentStreak, longestStreak, lastSessionDate } =
-            state.progress;
+          let { currentStreak } = state.progress;
+          const { longestStreak, lastSessionDate } = state.progress;
 
           if (lastSessionDate) {
             const gap = daysBetween(lastSessionDate, today);

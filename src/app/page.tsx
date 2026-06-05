@@ -115,7 +115,7 @@ export default function Home() {
     return (
       <div className="app-screen flex flex-col px-4 pt-10 pb-6 max-w-lg mx-auto animate-fade-in">
         <div className="text-center mb-10">
-          <h1 className="text-7xl font-black uppercase tracking-[0.04em] leading-none gradient-text">
+          <h1 className="text-8xl font-display uppercase tracking-[0.01em] leading-none text-foreground">
             Tarima
           </h1>
           <div className="mt-3 flex items-center justify-center gap-2">
@@ -132,7 +132,7 @@ export default function Home() {
           {mounted && (
             <div className="mt-4 flex items-center justify-center gap-2">
               {isPro ? (
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full bg-gradient-to-r from-accent to-gold text-black">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full bg-accent text-[#0a0a0b]">
                   ★ Pro
                 </span>
               ) : (
@@ -167,7 +167,7 @@ export default function Home() {
                 </p>
               </div>
               <div>
-                <p className="text-xl font-bold text-gold">
+                <p className="text-xl font-bold text-foreground">
                   {progress.totalBars}
                 </p>
                 <p className="text-[10px] text-muted uppercase tracking-wider">
@@ -201,7 +201,7 @@ export default function Home() {
     return (
       <div className="app-screen flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto animate-slide-up">
         <div className="text-center mb-8">
-          <h2 className="text-5xl font-black uppercase tracking-wide gradient-text">
+          <h2 className="text-6xl font-display uppercase tracking-tight text-foreground">
             Beat
           </h2>
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted mt-2">
@@ -253,7 +253,7 @@ export default function Home() {
                     }}
                     className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm transition-all ${
                       previewing
-                        ? "bg-accent text-white glow-pink"
+                        ? "bg-accent text-[#0a0a0b] glow-accent"
                         : "bg-surface-hover text-muted"
                     }`}
                   >
@@ -357,50 +357,42 @@ export default function Home() {
 
   // DIFFICULTY
   if (step === "difficulty") {
+    // Uniform graphite cards; the only colour is a small heat-ramp dot
+    // (cool→hot = easy→brutal). Selection is the acid-lime ring.
     const difficulties: {
       key: Difficulty;
       label: string;
       subtitle: string;
       desc: string;
-      color: string;
-      cardClass: string;
-      glowClass: string;
+      dot: string;
     }[] = [
       {
         key: "principiante",
         label: "Fácil",
         subtitle: "Rimas simples",
         desc: "Palabras cortas y comunes. Perfecto para calentar.",
-        color: "bg-green",
-        cardClass: "card-green",
-        glowClass: "glow-green",
+        dot: "bg-tier-1",
       },
       {
         key: "intermedio",
         label: "Medio",
         subtitle: "Vocabulario variado",
         desc: "Rimas de dos sílabas y más expresión.",
-        color: "bg-yellow",
-        cardClass: "card-yellow",
-        glowClass: "glow-yellow",
+        dot: "bg-tier-2",
       },
       {
         key: "avanzado",
         label: "Difícil",
         subtitle: "Flow real",
         desc: "Rimas avanzadas y multisilabas. Para MCs de verdad.",
-        color: "bg-red",
-        cardClass: "card-red",
-        glowClass: "glow-red",
+        dot: "bg-tier-3",
       },
       {
         key: "experto",
         label: "Experto",
         subtitle: "Sin piedad",
         desc: "Vocabulario extremo. Velocidad máxima. Sin ayuda.",
-        color: "bg-accent",
-        cardClass: "card-purple",
-        glowClass: "glow-pink",
+        dot: "bg-tier-4",
       },
     ];
 
@@ -421,7 +413,7 @@ export default function Home() {
         </div>
 
         <div className="text-center mb-8">
-          <h2 className="text-5xl font-black uppercase tracking-wide gradient-text">
+          <h2 className="text-6xl font-display uppercase tracking-tight text-foreground">
             Dificultad
           </h2>
           <p className="text-muted text-sm mt-2">
@@ -436,13 +428,13 @@ export default function Home() {
               <button
                 key={d.key}
                 onClick={() => setSelectedDifficulty(d.key)}
-                className={`w-full p-4 rounded-2xl text-left transition-all ${d.cardClass} ${
-                  selected ? d.glowClass : ""
+                className={`w-full p-4 rounded-2xl text-left transition-all card-dark ${
+                  selected ? "card-selected" : "hover:border-white/15"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-8 h-8 rounded-full ${d.color} flex-shrink-0`}
+                    className={`w-3 h-3 rounded-full ${d.dot} flex-shrink-0`}
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -489,7 +481,7 @@ export default function Home() {
   return (
     <div className="app-screen flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto animate-slide-up">
       <div className="text-center mb-8">
-        <h2 className="text-5xl font-black uppercase tracking-wide gradient-text">
+        <h2 className="text-6xl font-display uppercase tracking-tight text-foreground">
           Esquema
         </h2>
         <p className="text-muted text-sm mt-2">

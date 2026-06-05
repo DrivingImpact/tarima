@@ -40,7 +40,7 @@ export default function DiccionarioPage() {
       </div>
 
       <div className="text-center mb-6">
-        <h2 className="text-4xl font-black uppercase tracking-wide gradient-text">
+        <h2 className="text-5xl font-display uppercase tracking-tight text-foreground">
           Diccionario
         </h2>
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted mt-2">
@@ -77,7 +77,7 @@ export default function DiccionarioPage() {
             onClick={() => setRhymeType(type)}
             className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${
               rhymeType === type
-                ? "bg-accent text-white"
+                ? "bg-accent text-[#0a0a0b]"
                 : "bg-surface text-muted hover:text-foreground"
             }`}
           >
