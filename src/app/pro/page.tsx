@@ -139,8 +139,8 @@ export default function ProPage() {
           Sin pausas.
         </h1>
         <p className="text-sm text-muted mt-4 max-w-xs mx-auto">
-          Entrenamiento sin límites: sesiones ilimitadas y más variedad de
-          beats para practicar.
+          Todos los beats son gratis. Pro quita el límite diario: sesiones
+          ilimitadas, sin pausas.
         </p>
       </div>
 
@@ -234,9 +234,9 @@ export default function ProPage() {
               </div>
 
               <Row label="Sesiones / día" free={`${FREE_DAILY_SESSIONS}`} pro="∞" />
-              <Row label="Beats" free="5" pro="Todos" />
-              <Row label="Estilos" free="2" pro="8+" />
-              <Row label="Anuncios" free="—" pro="Sin anuncios" />
+              <Row label="Todos los beats" free="✓" pro="✓" />
+              <Row label="Sin límite diario" free="—" pro="✓" />
+              <Row label="Apoyo al proyecto" free="—" pro="✓" />
             </div>
           </div>
 

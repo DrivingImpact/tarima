@@ -37,10 +37,12 @@ export interface BeatTrack {
 // these stay as the offline fallback.
 //
 // Source URL pattern: `https://pixabay.com/music/<original-slug>-<id>/`.
+// All beats are FREE for everyone (see isBeatLocked). The `pro` field on the
+// type is kept for the remote-catalogue schema, but no bundled beat sets it —
+// Pro sells unlimited sessions, not access to music.
 export const BEAT_TRACKS: BeatTrack[] = [
-  // ── Free tier ──────────────────────────────────────────────────
-  // 5 beats covering boom-bap (slow→mid), old-school west-coast, and a
-  // jazz-hop / soul flavour so a free user immediately hears the breadth.
+  // Boom-bap (slow→mid), old-school west-coast, and a jazz-hop / soul flavour
+  // so the breadth is obvious from the first listen.
   {
     id: 'darren-hirst-minimal-90s', name: 'Minimal 90s', artist: 'Darren Hirst',
     style: 'boom-bap', tags: ['boom-bap', '90s', 'minimal'], bpm: 81,
@@ -85,7 +87,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     source: 'https://pixabay.com/music/beats-westcoast90stypebeat-508774/',
   },
 
-  // ── Pro tier ───────────────────────────────────────────────────
   {
     id: 'pasabaa-anantha-pernel', name: 'Anantha Pernel', artist: 'Pasabaa',
     style: 'boom-bap', tags: ['boom-bap', 'modern'], bpm: 89,
@@ -93,7 +94,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     source: 'https://pixabay.com/music/beats-rap-type-beat-anantha-pernel-instrumental-2025-416239/',
-    pro: true,
   },
   {
     id: 'delosound-old-school', name: 'Old School', artist: 'Delosound',
@@ -104,7 +104,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     source: 'https://pixabay.com/music/beats-hiphop-beat-old-school-boom-bap-421074/',
-    pro: true,
   },
   {
     id: 'sound4stock-urban', name: 'Urban', artist: 'Sound4Stock',
@@ -113,7 +112,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     source: 'https://pixabay.com/music/beats-urban-hip-hop-rap-beat-464285/',
-    pro: true,
   },
   {
     id: 'vxyage-territory', name: 'Territory', artist: 'Vxyage',
@@ -122,7 +120,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     source: 'https://pixabay.com/music/beats-old-style-horrorcore-rap-territory-424309/',
-    pro: true,
   },
   {
     id: 'yellowbirdbeats-back-right', name: 'Back Right', artist: 'YellowBirdBeats',
@@ -134,7 +131,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     source: 'https://pixabay.com/music/beats-old-school-x-rap-x-hip-hop-beat-battle-x-freestyle-back-right-494512/',
-    pro: true,
   },
   {
     id: 'jake-plah-freestyle', name: 'Freestyle', artist: 'Jake Plah',
@@ -145,7 +141,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     source: 'https://pixabay.com/music/beats-rap-freestyle-beat-435114/',
-    pro: true,
   },
 ];
 

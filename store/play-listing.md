@@ -43,8 +43,8 @@ Sin cuentas. Sin anuncios. Sin recopilar datos personales. Todo el progreso se
 guarda solo en el dispositivo.
 
 TARIMA PRO
-La versión gratuita incluye sesiones diarias y una selección de beats. Pro
-desbloquea la biblioteca completa de beats y sesiones ilimitadas.
+Todos los beats son gratis para todas las personas. La versión gratuita
+incluye un número de sesiones por día; Tarima Pro ofrece sesiones ilimitadas.
 
 Música de Pixabay bajo la Licencia de Contenido de Pixabay.
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Privacidad — Tarima",
@@ -79,7 +80,7 @@ export default function PrivacyPage() {
 
         <Section title="Contacto">
           Para cualquier consulta sobre privacidad, escribir a{" "}
-          <span className="text-accent">hola@tarima.app</span>.
+          <span className="text-accent">{SUPPORT_EMAIL}</span>.
         </Section>
       </div>
     </div>

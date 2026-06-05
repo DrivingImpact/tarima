@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PRO_PRICE } from "@/lib/entitlements";
+import { SUPPORT_EMAIL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Términos — Tarima",
@@ -49,9 +50,10 @@ export default function TermsPage() {
         </Section>
 
         <Section title="Suscripción Tarima Pro">
-          La versión gratuita incluye un número limitado de sesiones por día.
-          Tarima Pro ofrece sesiones ilimitadas y más variedad de beats. Precios
-          de referencia: {PRO_PRICE.monthly}/mes o {PRO_PRICE.yearly}/año (pueden
+          Todos los beats son gratuitos para todas las personas. La versión
+          gratuita incluye un número limitado de sesiones por día; Tarima Pro
+          ofrece sesiones ilimitadas. Precios de referencia:{" "}
+          {PRO_PRICE.monthly}/mes o {PRO_PRICE.yearly}/año (pueden
           variar por región e impuestos). La suscripción se compra y se gestiona
           a través de Google Play y <strong>se renueva automáticamente</strong>{" "}
           al final de cada período, salvo que se cancele al menos 24 horas antes
@@ -91,7 +93,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="Contacto">
-          Consultas: <span className="text-accent">hola@tarima.app</span>.
+          Consultas: <span className="text-accent">{SUPPORT_EMAIL}</span>.
         </Section>
       </div>
 

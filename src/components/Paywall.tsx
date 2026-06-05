@@ -60,11 +60,11 @@ export function Paywall({ reason, onClose }: PaywallProps) {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-accent mt-0.5">✓</span>
-            <span>Más variedad de beats para entrenar</span>
+            <span>Sin esperar hasta mañana</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-accent mt-0.5">✓</span>
-            <span>Sin anuncios, sin distracciones</span>
+            <span>Apoyo directo al proyecto</span>
           </li>
         </ul>
 
