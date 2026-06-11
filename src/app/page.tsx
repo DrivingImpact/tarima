@@ -12,6 +12,7 @@ import { useHydrated } from "@/lib/use-hydrated";
 import { useAppStore } from "@/lib/store";
 import { getWordsByDifficulty } from "@/lib/words";
 import { FREE_DAILY_SESSIONS, isBeatLocked } from "@/lib/entitlements";
+import { isNative } from "@/lib/purchases";
 import { Paywall } from "@/components/Paywall";
 
 type Step = "home" | "beat" | "difficulty" | "scheme";
@@ -192,6 +193,35 @@ export default function Home() {
         >
           Siguiente &rsaquo;
         </button>
+
+        {/* Web-only footer: the APK link makes no sense inside the app
+            itself, and native nav already exposes créditos/legal. */}
+        {mounted && !isNative() && (
+          <div className="mt-8 text-center space-y-3">
+            <a
+              href="https://github.com/DrivingImpact/tarima/releases/latest/download/app-release.apk"
+              className="inline-block text-[11px] font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full border border-accent/40 text-accent hover:bg-accent/10 transition-colors"
+            >
+              ⤓ Descargar para Android (APK)
+            </a>
+            <div className="flex items-center justify-center gap-3 text-[10px] uppercase tracking-[0.15em] text-muted">
+              <a
+                href="https://instagram.com/tarimafreestyle"
+                className="hover:text-accent transition-colors"
+              >
+                Instagram
+              </a>
+              <span aria-hidden>·</span>
+              <Link href="/creditos" className="hover:text-accent transition-colors">
+                Créditos
+              </Link>
+              <span aria-hidden>·</span>
+              <Link href="/privacy" className="hover:text-accent transition-colors">
+                Privacidad
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
