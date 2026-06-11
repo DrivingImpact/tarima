@@ -43,3 +43,4 @@ next-env.d.ts
 
 # Pixabay beats: bundled into app builds only, never committed (license: no standalone redistribution)
 /public/beats-v2/
+/store/legal-audit.md
