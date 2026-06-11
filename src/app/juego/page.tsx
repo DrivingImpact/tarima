@@ -4,7 +4,17 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { DIFFICULTY_CONFIG, beatsPerBarFor } from "@/lib/types";
+import type { Word } from "@/lib/types";
 import { MusicClock } from "@/lib/music-clock";
+import {
+  VinylViz,
+  LaneViz,
+  TypeViz,
+  VizToggle,
+  loadVizMode,
+  saveVizMode,
+  type VizMode,
+} from "@/components/GameVisualizers";
 
 // Quick synthesised beep — used for the 3-2-1 countdown. Sine oscillator with
 // a short exponential decay so it doesn't click. One AudioContext per beep
@@ -63,6 +73,15 @@ export default function JuegoPage() {
   // Elapsed seconds, ticked by an interval while playing — kept in state so we
   // never call Date.now() during render.
   const [elapsed, setElapsed] = useState(0);
+
+  // Visualizer mode — persisted across sessions. Lazy initializer:
+  // loadVizMode() guards `window` itself, and this screen only renders
+  // post-countdown (long after hydration), so no mismatch risk.
+  const [vizMode, setVizMode] = useState<VizMode>(() => loadVizMode());
+  const changeViz = useCallback((m: VizMode) => {
+    setVizMode(m);
+    saveVizMode(m);
+  }, []);
 
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdownNum, setCountdownNum] = useState(3);
@@ -434,9 +453,17 @@ export default function JuegoPage() {
   const beatInBar = view.beatInBar;
 
   // Words queue: bar 0 = current, bars 1..3 = upcoming preview
-  const queue: (string | null)[] = Array.from({ length: BARS_VISIBLE }).map(
-    (_, i) => game.currentWords[game.activeWordIndex + i]?.text ?? null,
+  const queue: (Word | null)[] = Array.from({ length: BARS_VISIBLE }).map(
+    (_, i) => game.currentWords[game.activeWordIndex + i] ?? null,
   );
+  const prevWord: Word | null =
+    game.activeWordIndex > 0
+      ? game.currentWords[game.activeWordIndex - 1] ?? null
+      : null;
+
+  // Fractional bar position (0..1) + integer beat — shared by all visualizers.
+  const barFrac = Math.min(0.999, Math.max(0, beatInBar / beatsPerBar));
+  const beatIdx = Math.min(beatsPerBar - 1, Math.floor(beatInBar));
 
   return (
     <div
@@ -536,72 +563,42 @@ export default function JuegoPage() {
         }}
       />
 
-      {/* ─── PENTAGRAM (musical staff) ─── */}
+      {/* ─── VISUALIZER (vinilo / carril / tipo) ─── */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 relative">
         <div className="w-full max-w-3xl">
-          {/* Active word — hero. Fills the row, scales down if too long. */}
-          <div className="text-center mb-3 px-2">
-            <p
-              key={`active-${game.activeWordIndex}`}
-              className="text-accent font-display uppercase tracking-tight animate-word-reveal leading-none break-words"
-              style={{
-                fontSize: `clamp(2.25rem, ${Math.min(4.5, 28 / Math.max(4, queue[0]?.length ?? 4))}rem, 4rem)`,
-              }}
-            >
-              {queue[0] || "—"}
-            </p>
-          </div>
+          {vizMode === "vinilo" ? (
+            <VinylViz
+              barFrac={barFrac}
+              beatIdx={beatIdx}
+              beatsPerBar={beatsPerBar}
+              isPaused={game.isPaused}
+              queue={queue}
+              prevWord={prevWord}
+            />
+          ) : vizMode === "carril" ? (
+            <LaneViz
+              barFrac={barFrac}
+              beatIdx={beatIdx}
+              beatsPerBar={beatsPerBar}
+              isPaused={game.isPaused}
+              queue={queue}
+              prevWord={prevWord}
+            />
+          ) : (
+            <TypeViz
+              barFrac={barFrac}
+              beatIdx={beatIdx}
+              beatsPerBar={beatsPerBar}
+              isPaused={game.isPaused}
+              queue={queue}
+              prevWord={prevWord}
+            />
+          )}
+        </div>
 
-          {/* Upcoming preview strip — full words, smaller, dimmed */}
-          <div className="flex items-center justify-center gap-2 mb-4 px-2 text-center">
-            <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-muted/60 whitespace-nowrap">
-              Siguen
-            </span>
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              {queue.slice(1).map((text, i) => (
-                <span
-                  key={`up-${text ?? "_"}-${game.activeWordIndex}-${i + 1}`}
-                  className={`uppercase font-bold tracking-wide whitespace-nowrap ${
-                    i === 0
-                      ? "text-sm sm:text-base text-foreground/80"
-                      : i === 1
-                      ? "text-xs sm:text-sm text-foreground/55"
-                      : "text-xs text-foreground/35"
-                  }`}
-                >
-                  {text || "—"}
-                  {i < queue.length - 2 && (
-                    <span className="ml-2 text-muted/30">·</span>
-                  )}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* The staff itself */}
-          <Pentagram
-            beatInBar={beatInBar}
-            beatsPerBar={beatsPerBar}
-            isPaused={game.isPaused}
-          />
-
-          {/* Beat counter underneath the staff — centered, just the active bar's beats */}
-          <div className="flex justify-center gap-2 mt-3">
-            {Array.from({ length: beatsPerBar }).map((_, b) => (
-              <span
-                key={b}
-                className={`text-sm font-mono transition-all ${
-                  b === beatInBar && !game.isPaused
-                    ? "text-accent font-black scale-125"
-                    : b < beatInBar
-                    ? "text-accent/40"
-                    : "text-muted/40"
-                }`}
-              >
-                {b + 1}
-              </span>
-            ))}
-          </div>
+        {/* Mode toggle — bottom of the stage so it never crowds the word */}
+        <div className="absolute bottom-1 left-0 right-0">
+          <VizToggle mode={vizMode} onChange={changeViz} />
         </div>
       </div>
 
@@ -829,165 +826,5 @@ function Transport({
         </button>
       </div>
     </div>
-  );
-}
-
-function Pentagram({
-  beatInBar,
-  beatsPerBar,
-  isPaused,
-}: {
-  beatInBar: number;
-  beatsPerBar: number;
-  isPaused: boolean;
-}) {
-  // SVG-based staff. Width is responsive via viewBox.
-  const STAFF_W = 1200;
-  const STAFF_H = 140;
-  const STAFF_TOP = 40;
-  const STAFF_BOTTOM = 110;
-  const LINE_GAP = (STAFF_BOTTOM - STAFF_TOP) / 4;
-  const CLEF_X = 30;
-  const STAFF_LEFT = 95;
-  const STAFF_RIGHT = STAFF_W - 20;
-  const BAR_W = (STAFF_RIGHT - STAFF_LEFT) / BARS_VISIBLE;
-  // The active bar is always the first (leftmost). The playhead moves across
-  // it in beatsPerBar steps.
-  const playheadX = STAFF_LEFT + (beatInBar / beatsPerBar) * BAR_W + BAR_W / (beatsPerBar * 2);
-
-  return (
-    <svg
-      viewBox={`0 0 ${STAFF_W} ${STAFF_H}`}
-      className="w-full"
-      preserveAspectRatio="none"
-      style={{ height: "min(28vh, 200px)" }}
-    >
-      {/* Active bar background highlight */}
-      <rect
-        x={STAFF_LEFT}
-        y={STAFF_TOP - 6}
-        width={BAR_W}
-        height={STAFF_BOTTOM - STAFF_TOP + 12}
-        fill="rgba(198, 255, 58, 0.06)"
-        rx={4}
-      />
-
-      {/* 5 staff lines */}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <line
-          key={i}
-          x1={CLEF_X}
-          x2={STAFF_RIGHT}
-          y1={STAFF_TOP + i * LINE_GAP}
-          y2={STAFF_TOP + i * LINE_GAP}
-          stroke="rgba(255,255,255,0.35)"
-          strokeWidth={1.2}
-        />
-      ))}
-
-      {/* Bar lines (vertical dividers) */}
-      {Array.from({ length: BARS_VISIBLE + 1 }).map((_, i) => (
-        <line
-          key={i}
-          x1={STAFF_LEFT + i * BAR_W}
-          x2={STAFF_LEFT + i * BAR_W}
-          y1={STAFF_TOP}
-          y2={STAFF_BOTTOM}
-          stroke={i === 0 || i === BARS_VISIBLE ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.25)"}
-          strokeWidth={i === BARS_VISIBLE ? 3 : 1}
-        />
-      ))}
-
-      {/* Treble clef glyph */}
-      <text
-        x={CLEF_X}
-        y={STAFF_BOTTOM + 12}
-        fill="rgba(255,255,255,0.85)"
-        fontSize={88}
-        fontFamily="serif"
-      >
-        𝄞
-      </text>
-
-      {/* Time signature 4/4 */}
-      <text
-        x={STAFF_LEFT - 28}
-        y={STAFF_TOP + LINE_GAP * 1.4}
-        fill="rgba(255,255,255,0.7)"
-        fontSize={26}
-        fontWeight={800}
-        fontFamily="serif"
-      >
-        4
-      </text>
-      <text
-        x={STAFF_LEFT - 28}
-        y={STAFF_TOP + LINE_GAP * 3.4}
-        fill="rgba(255,255,255,0.7)"
-        fontSize={26}
-        fontWeight={800}
-        fontFamily="serif"
-      >
-        4
-      </text>
-
-      {/* Beat noteheads (quarter notes) on each beat of every visible bar.
-          Active bar's beats glow brighter near the playhead. */}
-      {Array.from({ length: BARS_VISIBLE }).map((_, barIdx) =>
-        Array.from({ length: beatsPerBar }).map((_, b) => {
-          const cx = STAFF_LEFT + barIdx * BAR_W + (b + 0.5) * (BAR_W / beatsPerBar);
-          const cy = STAFF_TOP + LINE_GAP * 2; // middle line
-          const isActiveBar = barIdx === 0;
-          const isPlayed = isActiveBar && b < beatInBar;
-          const isOn = isActiveBar && b === beatInBar && !isPaused;
-          const opacity = isActiveBar
-            ? isOn
-              ? 1
-              : isPlayed
-              ? 0.6
-              : 0.85
-            : barIdx === 1
-            ? 0.35
-            : barIdx === 2
-            ? 0.18
-            : 0.1;
-          const fill = isOn ? "#c6ff3a" : isActiveBar ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.7)";
-          return (
-            <g key={`${barIdx}-${b}`} opacity={opacity}>
-              <ellipse cx={cx} cy={cy} rx={9} ry={7} fill={fill} transform={`rotate(-20 ${cx} ${cy})`} />
-              {/* Stem */}
-              <line
-                x1={cx + 8}
-                x2={cx + 8}
-                y1={cy - 4}
-                y2={cy - 36}
-                stroke={fill}
-                strokeWidth={2.2}
-              />
-            </g>
-          );
-        }),
-      )}
-
-      {/* Playhead — vertical glowing line in active bar */}
-      {!isPaused && (
-        <g>
-          <line
-            x1={playheadX}
-            x2={playheadX}
-            y1={STAFF_TOP - 12}
-            y2={STAFF_BOTTOM + 12}
-            stroke="#c6ff3a"
-            strokeWidth={2.5}
-            opacity={0.9}
-          >
-            <animate attributeName="opacity" values="0.7;1;0.7" dur="0.4s" repeatCount="indefinite" />
-          </line>
-          <circle cx={playheadX} cy={STAFF_TOP - 12} r={5} fill="#c6ff3a">
-            <animate attributeName="r" values="4;6;4" dur="0.4s" repeatCount="indefinite" />
-          </circle>
-        </g>
-      )}
-    </svg>
   );
 }
