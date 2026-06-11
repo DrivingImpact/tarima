@@ -3,6 +3,7 @@ import { Anton, Archivo, JetBrains_Mono } from "next/font/google";
 import { DesktopFrame } from "@/components/DesktopFrame";
 import { PurchasesInit } from "@/components/PurchasesInit";
 import { AppUpdater } from "@/components/AppUpdater";
+import { NativeChrome } from "@/components/NativeChrome";
 import "./globals.css";
 
 // Type system — "Acid Underground":
@@ -65,6 +66,7 @@ export default function RootLayout({
       <body className="min-h-full bg-stage text-foreground">
         <PurchasesInit />
         <AppUpdater />
+        <NativeChrome />
         <DesktopFrame>{children}</DesktopFrame>
       </body>
     </html>

@@ -8,3 +8,7 @@ store
 scripts
 *.log
 .vercel
+
+# Re-include the git-ignored beats: the web deploy needs the audio.
+!public/beats-v2
+!public/beats-v2/**

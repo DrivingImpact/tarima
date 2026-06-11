@@ -376,11 +376,36 @@ export default function JuegoPage() {
   if (showCountdown) {
     return (
       <div className="app-screen flex items-center justify-center bg-background">
-        <div className="text-center animate-slide-up" key={countdownNum}>
+        <div className="text-center animate-slide-up px-6" key={countdownNum}>
           {countdownNum > 0 ? (
             <p className="text-9xl font-display text-accent">{countdownNum}</p>
+          ) : errorMsg ? (
+            // The beat failed to load — without this the screen would sit on
+            // ¡DALE! forever with the error hidden in the (unmounted) header.
+            <div className="space-y-5">
+              <p className="text-4xl font-display uppercase text-foreground">
+                No se pudo cargar el beat
+              </p>
+              <p className="text-sm text-danger break-words">{errorMsg}</p>
+              <button
+                onClick={() => {
+                  endSession();
+                  router.push("/");
+                }}
+                className="px-8 py-3 rounded-2xl btn-primary text-sm"
+              >
+                Volver al inicio
+              </button>
+            </div>
           ) : (
-            <p className="text-7xl font-display uppercase text-accent">¡DALE!</p>
+            <>
+              <p className="text-7xl font-display uppercase text-accent">¡DALE!</p>
+              {!bufferReady && (
+                <p className="text-xs text-muted mt-4 animate-pulse uppercase tracking-[0.25em]">
+                  cargando beat…
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

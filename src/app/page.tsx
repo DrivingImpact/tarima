@@ -114,7 +114,7 @@ export default function Home() {
   // HOME
   if (step === "home") {
     return (
-      <div className="app-screen flex flex-col px-4 pt-10 pb-6 max-w-lg mx-auto animate-fade-in">
+      <div className="app-screen flex flex-col justify-center px-4 py-8 max-w-lg mx-auto animate-fade-in">
         <div className="text-center mb-10">
           <h1 className="text-8xl font-display uppercase tracking-[0.01em] leading-none text-foreground">
             Tarima
@@ -229,7 +229,7 @@ export default function Home() {
   // BEAT SELECTOR
   if (step === "beat") {
     return (
-      <div className="app-screen flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto animate-slide-up">
+      <div className="app-screen h-dvh overflow-hidden flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto animate-slide-up">
         <div className="text-center mb-8">
           <h2 className="text-6xl font-display uppercase tracking-tight text-foreground">
             Beat
@@ -243,7 +243,7 @@ export default function Home() {
           🎧 Elegir instrumental
         </p>
 
-        <div className="flex-1 space-y-2 overflow-y-auto mb-4">
+        <div className="flex-1 min-h-0 space-y-2 overflow-y-auto mb-4">
           {BEAT_TRACKS.map((beat, idx) => {
             const selected = selectedBeatIdx === idx;
             const previewing = previewingIdx === idx;
