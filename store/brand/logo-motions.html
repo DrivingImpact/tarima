@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000}
+#stage{width:1080px;height:1080px;position:relative;overflow:hidden;font-family:Anton}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const Q = new URLSearchParams(location.search);
+const V = Number(Q.get('v') || 1);
+const BPMS = { 1: 88, 2: 92, 3: 86, 4: 88, 5: 92 };
+const BPM = BPMS[V], BEAT = 60 / BPM, BAR = BEAT * 4;
+
+const LIME = '#c6ff3a', INK = '#0a0a0b', BONE = '#ececE6';
+const stage = document.getElementById('stage');
+const easeOut = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+const punch = (t) => Math.pow(Math.max(0, 1 - (t % BEAT) / (BEAT * 0.55)), 2);
+
+/**
+ * The official mark, parametric.
+ *  rise: 0..1 (disc emerging over the stage bar)
+ *  rot:  rotation in degrees of grooves + shine (label stays put)
+ *  dark: colorway flag
+ *  scale/cx/cy in a 1080 canvas; disc radius 300 at scale 1
+ */
+function mark({ rise = 1, rot = 0, dark = false, scale = 1, showName = true, nameAlpha = 1, cy = 560 }) {
+  const R = 300 * scale;
+  const stageY = cy;
+  const discY = stageY + R * (1 - rise);     // center sits below the line, rises up
+  const discFill = dark ? '#1d1d21' : INK;
+  const groove = dark ? 'rgba(236,236,230,.22)' : 'rgba(236,236,230,.25)';
+  const label = dark ? LIME : BONE;
+  const barFill = dark ? LIME : INK;
+  const nameFill = dark ? BONE : INK;
+  const shineR = R * 0.886, shineW = 22 * scale;
+  return `
+  <svg width="1080" height="1080" viewBox="0 0 1080 1080" style="position:absolute;inset:0">
+    <defs><clipPath id="cp"><rect x="0" y="${stageY - 1080}" width="1080" height="1080"/></clipPath></defs>
+    <g clip-path="url(#cp)">
+      <g transform="rotate(${rot} 540 ${discY})">
+        <circle cx="540" cy="${discY}" r="${R}" fill="${discFill}" ${dark ? `stroke="#3c3c44" stroke-width="5"` : ''}/>
+        <circle cx="540" cy="${discY}" r="${R * 0.773}" fill="none" stroke="${groove}" stroke-width="${10 * scale}"/>
+        <circle cx="540" cy="${discY}" r="${R * 0.56}" fill="none" stroke="${groove}" stroke-width="${10 * scale}"/>
+        <path d="M 540 ${discY} m ${-shineR * 0.7071} ${-shineR * 0.7071} a ${shineR} ${shineR} 0 0 1 ${shineR * 0.3536} ${-shineR * 0.2125}"
+          fill="none" stroke="rgba(236,236,230,.55)" stroke-width="${shineW}" stroke-linecap="round"/>
+      </g>
+      <circle cx="540" cy="${discY}" r="${R * 0.346}" fill="${label}"/>
+      <circle cx="540" cy="${discY}" r="${R * 0.053}" fill="${INK}"/>
+    </g>
+    <rect x="${540 - R - 60}" y="${stageY}" width="${(R + 60) * 2}" height="${36 * scale}" rx="${18 * scale}" fill="${barFill}"/>
+    ${showName ? `<text x="540" y="${stageY + 36 * scale + 118 * scale}" text-anchor="middle" fill="${nameFill}"
+      font-family="Anton" font-size="${112 * scale}" letter-spacing="8" opacity="${nameAlpha}">TARIMA</text>` : ''}
+  </svg>`;
+}
+
+const bg = (dark) => dark
+  ? 'radial-gradient(130% 130% at 30% 20%, #16170f 0%, #0a0a0b 55%)'
+  : LIME;
+
+function flashLayer(a, dark) {
+  const c = dark ? 'rgba(198,255,58,.18)' : 'rgba(255,255,255,.30)';
+  return `<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 48%, ${c}, transparent 60%);opacity:${a}"></div>`;
+}
+
+// V1 NACE — sunrise: disc rises bar 1, spins forever, name fades bar 2
+function v1(t) {
+  const rise = easeOut(t / (BAR * 0.9));
+  const rot = (t / BAR) * 360;
+  const nameAlpha = easeOut((t - BAR) / 0.5);
+  const s = 1 + 0.02 * punch(t) * (t > BAR ? 1 : 0);
+  return { dark: false, html: `<div style="position:absolute;inset:0;transform:scale(${s});transform-origin:50% 56%">
+    ${mark({ rise, rot, nameAlpha })}</div>${flashLayer(t > BAR ? 0.6 * punch(t) : 0, false)}` };
+}
+
+// V2 PÚA — black colorway, needle drops, hard pulses
+function v2(t) {
+  const rot = (t / BAR) * 360;
+  const drop = easeOut(t / (BEAT * 2));
+  const armAng = -38 + 30 * drop;
+  const started = t > BEAT * 2;
+  const s = 1 + (started ? 0.05 * punch(t) : 0);
+  const sub = started ? `<div style="position:absolute;left:0;right:0;bottom:96px;text-align:center;
+      font:700 34px 'JetBrains Mono';letter-spacing:.4em;color:#7e7e78;opacity:${easeOut((t - BEAT * 2) / 0.5)}">DONDE NACE EL FREESTYLE</div>` : '';
+  return { dark: true, html: `<div style="position:absolute;inset:0;transform:scale(${s});transform-origin:50% 52%">
+    ${mark({ rise: 1, rot: started ? rot : 0, dark: true })}
+    <svg width="1080" height="1080" viewBox="0 0 1080 1080" style="position:absolute;inset:0">
+      <g transform="rotate(${armAng} 920 150)">
+        <circle cx="920" cy="150" r="44" fill="${BONE}"/>
+        <line x1="920" y1="150" x2="700" y2="430" stroke="${BONE}" stroke-width="26" stroke-linecap="round"/>
+        <rect x="664" y="416" width="74" height="44" rx="14" fill="${LIME}" transform="rotate(-38 700 438)"/>
+      </g>
+    </svg></div>${sub}${flashLayer(started ? 0.7 * punch(t) : 0, true)}` };
+}
+
+// V3 STING — fast bumper: bar sweeps, disc pops, name slams (2.5 bars)
+function v3(t) {
+  const b = t / BEAT;
+  const sweep = easeOut(b / 1);                       // beat 1: stage bar sweeps in
+  const pop = b > 1 ? easeOut((b - 1) / 0.7) : 0;     // beat 2: disc pops
+  const slam = b > 2 ? easeOut((b - 2) / 0.6) : 0;    // beat 3: name slams
+  const rot = (t / BAR) * 360;
+  const s = 1 + 0.04 * punch(t) * (b > 2 ? 1 : 0);
+  return { dark: false, html: `
+    <div style="position:absolute;inset:0;transform:scale(${s});transform-origin:50% 56%">
+      <div style="position:absolute;inset:0;clip-path:inset(0 ${(1 - sweep) * 100}% 0 0)">
+        ${mark({ rise: pop, rot, showName: false })}</div>
+      ${slam > 0 ? `<div style="position:absolute;left:0;right:0;top:740px;text-align:center;
+        font-family:Anton;font-size:${118}px;letter-spacing:8px;color:${INK};
+        transform:scale(${1.6 - 0.6 * slam});opacity:${slam}">TARIMA</div>` : ''}
+    </div>${flashLayer(b > 2 ? 0.6 * punch(t) : 0, false)}` };
+}
+
+// V4 FLIP — colorway inverts every bar with a vertical wipe
+function v4(t) {
+  const bar = Math.floor(t / BAR);
+  const darkNow = bar % 2 === 1;
+  const f = (t % BAR) / BAR;
+  const wipe = easeOut(Math.min(1, f * 6));           // quick wipe at each bar start
+  const rot = (t / BAR) * 360;
+  const cur = mark({ rise: 1, rot, dark: darkNow });
+  const prev = mark({ rise: 1, rot, dark: !darkNow });
+  return { dark: darkNow, html: `
+    <div style="position:absolute;inset:0;background:${bg(!darkNow)}">${prev}</div>
+    <div style="position:absolute;inset:0;background:${bg(darkNow)};clip-path:inset(0 0 ${(1 - wipe) * 100}% 0)">${cur}</div>
+    ${flashLayer(0.45 * punch(t), darkNow)}`, noBg: true };
+}
+
+// V5 ECUALIZADOR — stage bar becomes dancing EQ under the disc
+const prand = (i, k) => 0.5 + 0.5 * Math.sin(i * 12.9898 + k * 78.233);
+function v5(t) {
+  const rot = (t / BAR) * 360;
+  const k = Math.floor(t / BEAT);
+  const bars = Array.from({ length: 13 }, (_, i) => {
+    const h = 26 + 120 * prand(i, k) * (0.35 + 0.65 * punch(t));
+    return `<rect x="${214 + i * 52}" y="${596}" width="34" height="${h}" rx="14" fill="${INK}" opacity="${i % 2 ? 0.85 : 1}"/>`;
+  }).join('');
+  return { dark: false, html: `
+    ${mark({ rise: 1, rot, showName: false, cy: 560 })}
+    <svg width="1080" height="1080" viewBox="0 0 1080 1080" style="position:absolute;inset:0">${bars}</svg>
+    <div style="position:absolute;left:0;right:0;top:824px;text-align:center;font-family:Anton;
+      font-size:104px;letter-spacing:8px;color:${INK};transform:scale(${1 + 0.025 * punch(t)})">TARIMA</div>
+    ${flashLayer(0.35 * punch(t), false)}` };
+}
+
+const FNS = { 1: v1, 2: v2, 3: v3, 4: v4, 5: v5 };
+window.renderAt = (t) => {
+  const r = FNS[V](t);
+  stage.style.background = r.noBg ? 'transparent' : bg(r.dark);
+  stage.innerHTML = r.html;
+  return true;
+};
+window.renderAt(0);
+</script>
+</body>
+</html>
