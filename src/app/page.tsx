@@ -279,6 +279,9 @@ export default function Home() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      // Playing a preview IS choosing the song — users expect
+                      // "the beat I'm hearing is the beat I'll get".
+                      setSelectedBeatIdx(idx);
                       togglePreview(idx);
                     }}
                     className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm transition-all ${

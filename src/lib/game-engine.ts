@@ -82,12 +82,37 @@ function selectMultilevelGroups(
 }
 
 /**
+ * "Lazy rhyme": one word is literally the tail of the other (sandía/día,
+ * corazón/razón). Rhyming a word with its own ending feels like cheating on
+ * stage, so those pairs are never offered together.
+ */
+export function isLazyRhyme(a: Word, b: Word): boolean {
+  const x = a.text.toLowerCase();
+  const y = b.text.toLowerCase();
+  if (x === y) return true;
+  return x.endsWith(y) || y.endsWith(x);
+}
+
+/**
  * Pick `n` unique words from a group, excluding already-used texts.
+ * Avoids lazy-rhyme pairs within the pick; falls back to plain picks if the
+ * group is too small to satisfy the constraint — a lazy rhyme beats an
+ * incomplete round.
  */
 function pickFromGroup(group: Word[], n: number, used: Set<string>): Word[] {
   const available = group.filter((w) => !used.has(w.text));
   shuffle(available);
-  return available.slice(0, n);
+  const picked: Word[] = [];
+  for (const w of available) {
+    if (picked.length >= n) break;
+    if (picked.some((p) => isLazyRhyme(p, w))) continue;
+    picked.push(w);
+  }
+  for (const w of available) {
+    if (picked.length >= n) break;
+    if (!picked.includes(w)) picked.push(w);
+  }
+  return picked;
 }
 
 

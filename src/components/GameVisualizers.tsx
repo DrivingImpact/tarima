@@ -276,9 +276,11 @@ export function LaneViz({ barFrac, beatIdx, beatsPerBar, isPaused, queue, prevWo
         {/* The tape */}
         {laneW > 0 &&
           cells.map(({ word, slot }) => {
-            // Continuous position: slot 0 sits AT the hit line when frac=0 and
-            // drifts left as the bar plays out (the word is being used up).
-            const x = HIT + (slot - barFrac) * CELL;
+            // Continuous position: the live word's CENTER crosses the hit
+            // line exactly when its bar starts (cells are word-centered, so
+            // anchoring the cell's left edge instead made the line trail the
+            // word by half a cell).
+            const x = HIT - CELL / 2 + (slot - barFrac) * CELL;
             if (x < -CELL || x > laneW + CELL) return null;
             const isLive = slot === 0;
             const rhymes = rhymesWithActive(word, active);

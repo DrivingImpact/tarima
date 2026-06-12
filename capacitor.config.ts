@@ -19,6 +19,13 @@ const config: CapacitorConfig = {
       style: 'DARK', // "DARK" content style => light icons over our dark bg
       backgroundColor: '#0a0a0b',
     },
+    // Capacitor 8's built-in SystemBars plugin applies `hidden` at load,
+    // AFTER MainActivity/StatusBar.hide() — leaving this unset re-showed
+    // the status bar on every launch. This is the authoritative hide.
+    SystemBars: {
+      hidden: true,
+      style: 'DARK',
+    },
     // OTA web-bundle updates (Capgo). autoUpdate stays OFF until a Capgo
     // project is set up (`npx @capgo/cli init`), so a launch build never
     // polls an unconfigured backend. Flip to true once configured; then

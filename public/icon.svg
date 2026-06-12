@@ -1,13 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460">
-  <rect width="460" height="460" rx="104" fill="#c6ff3a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" rx="90" fill="#c6ff3a"/>
+  <defs><clipPath id="h"><rect x="0" y="60" width="400" height="208"/></clipPath></defs>
   <g clip-path="url(#h)">
-    <defs><clipPath id="h"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
-    <circle cx="230" cy="302" r="186" fill="#0a0a0b"/>
-    <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
-    <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
-    <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5" fill="none" stroke="rgba(236,236,230,.55)" stroke-width="13" stroke-linecap="round"/>
-    <circle cx="230" cy="302" r="64" fill="#ececE6"/>
-    <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
+    <circle cx="200" cy="268" r="150" fill="#0a0a0b"/>
+    <circle cx="200" cy="268" r="116" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="5"/>
+    <circle cx="200" cy="268" r="84" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="5"/>
+    <path d="M 200 268 m -94.05 -94.05 a 133 133 0 0 1 47.27 -28.62" fill="none" stroke="rgba(236,236,230,.55)" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="200" cy="268" r="52" fill="#ececE6"/>
+    <circle cx="200" cy="268" r="8" fill="#0a0a0b"/>
   </g>
-  <rect x="38" y="302" width="384" height="22" rx="11" fill="#0a0a0b"/>
+  <rect x="40" y="268" width="320" height="18" rx="9" fill="#0a0a0b"/>
+  <text x="200" y="348" text-anchor="middle" fill="#0a0a0b" font-family="Anton, 'Arial Black', sans-serif" font-weight="900" font-size="56" letter-spacing="4">TARIMA</text>
 </svg>

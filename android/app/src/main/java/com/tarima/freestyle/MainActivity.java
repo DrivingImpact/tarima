@@ -2,8 +2,10 @@ package com.tarima.freestyle;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
 
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -15,11 +17,22 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Draw into the display cutout instead of leaving a blank band.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
+        View decor = getWindow().getDecorView();
+        // Re-assert the hide whenever the system re-shows the bar. Capacitor's
+        // SystemBars plugin hides at load but leaves BEHAVIOR_DEFAULT, where
+        // any touch brings the status bar back permanently. With this
+        // listener, a swipe still reveals it transiently, then it auto-hides.
+        ViewCompat.setOnApplyWindowInsetsListener(decor, (v, insets) -> {
+            if (insets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                decor.post(this::hideSystemBars);
+            }
+            return ViewCompat.onApplyWindowInsets(v, insets);
+        });
+        decor.post(this::hideSystemBars);
     }
 
     @Override
@@ -28,14 +41,12 @@ public class MainActivity extends BridgeActivity {
         if (hasFocus) hideSystemBars();
     }
 
-    // Immersive game UI: no status bar. Swiping from the top shows it
-    // transiently, then it auto-hides again (BEHAVIOR_TRANSIENT).
     private void hideSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         WindowInsetsControllerCompat c =
             WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        c.hide(WindowInsetsCompat.Type.statusBars());
         c.setSystemBarsBehavior(
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        c.hide(WindowInsetsCompat.Type.statusBars());
     }
 }
