@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Tarima — 9 logos</title>
+<title>Tarima — 9 logos v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a0b;--fg:#ececE6;--lime:#c6ff3a;--dim:#9fcf2a;--ink:#0a0a0b}
@@ -10,155 +10,164 @@
 body{background:#1b1b1d;font-family:Archivo;display:flex;flex-wrap:wrap;gap:24px;padding:24px;justify-content:center}
 .tile{width:512px;height:512px;border-radius:116px;overflow:hidden;position:relative;
   background:radial-gradient(140% 140% at 30% 20%, #16170f 0%, #0a0a0b 55%);
-  display:flex;align-items:center;justify-content:center}
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
 .tile .num{position:absolute;top:18px;left:26px;color:#555;font:700 20px 'JetBrains Mono';z-index:9}
 .anton{font-family:Anton;text-transform:uppercase}
 svg{display:block}
-
-/* 1 PODIO — the tarima itself: stage + mic */
-/* 2 STENCIL — spray stencil T */
-/* 3 EQ-T — T built of equalizer bars */
-/* 4 BOCINA — speech-bubble T */
-/* 5 TA monogram */
-/* 6 VINILO */
-/* 7 PLAYHEAD T */
-/* 8 WORDMARK crop */
-/* 9 CORONA gallo */
 </style>
 </head>
 <body>
 
-<!-- 1 PODIO -->
+<!-- 1 METRÓNOMO CLÁSICO -->
 <div class="tile" id="l1"><span class="num">1</span>
-  <svg width="360" height="360" viewBox="0 0 360 360">
-    <!-- mic on a straight stand, planted on the tarima -->
-    <circle cx="180" cy="92" r="40" fill="#c6ff3a"/>
-    <rect x="172" y="132" width="16" height="100" rx="8" fill="#ececE6"/>
-    <path d="M140 244 h80" stroke="#ececE6" stroke-width="14" stroke-linecap="round"/>
-    <path d="M180 232 v12" stroke="#ececE6" stroke-width="14"/>
-    <!-- stage -->
-    <rect x="44" y="258" width="272" height="34" rx="10" fill="#c6ff3a"/>
-    <rect x="60" y="292" width="22" height="26" rx="4" fill="#3a3a3c"/>
-    <rect x="278" y="292" width="22" height="26" rx="4" fill="#3a3a3c"/>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <!-- body -->
+    <path d="M150 70 h80 l52 240 h-184 z" fill="none" stroke="#c6ff3a" stroke-width="20" stroke-linejoin="round"/>
+    <!-- tick marks inside -->
+    <g stroke="#3f3f41" stroke-width="8" stroke-linecap="round">
+      <line x1="190" y1="118" x2="190" y2="138"/>
+      <line x1="166" y1="150" x2="178" y2="166"/>
+      <line x1="214" y1="150" x2="202" y2="166"/>
+    </g>
+    <!-- pendulum, swung right, white with lime weight -->
+    <line x1="190" y1="286" x2="252" y2="116" stroke="#ececE6" stroke-width="16" stroke-linecap="round"/>
+    <rect x="222" y="148" width="44" height="30" rx="8" fill="#c6ff3a" transform="rotate(-70 244 163)"/>
+    <circle cx="190" cy="286" r="14" fill="#ececE6"/>
+    <!-- base -->
+    <rect x="128" y="318" width="124" height="22" rx="8" fill="#9fcf2a"/>
   </svg>
 </div>
 
-<!-- 2 STENCIL -->
+<!-- 2 LA "A" METRÓNOMO + WORDMARK -->
 <div class="tile" id="l2"><span class="num">2</span>
-  <svg width="380" height="380" viewBox="0 0 380 380">
-    <defs>
-      <filter id="rough"><feTurbulence baseFrequency="0.55" numOctaves="2" result="n"/>
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
-    </defs>
-    <g filter="url(#rough)" fill="#c6ff3a">
-      <!-- crossbar in two pieces (stencil bridges at the stem) -->
-      <polygon points="56,88 158,88 150,152 56,152"/>
-      <polygon points="222,88 324,88 324,152 214,152"/>
-      <!-- stem in two pieces (bridge at middle) -->
-      <polygon points="166,88 214,88 208,196 164,196"/>
-      <polygon points="162,212 206,212 196,318 152,318"/>
-    </g>
-    <text x="190" y="356" text-anchor="middle" fill="#5a5a5c"
-      font-family="JetBrains Mono" font-weight="700" font-size="24" letter-spacing="12">TARIMA</text>
+  <svg width="400" height="400" viewBox="0 0 400 400">
+    <!-- A as metronome triangle -->
+    <path d="M200 56 L292 300 H108 Z" fill="none" stroke="#ececE6" stroke-width="26" stroke-linejoin="round"/>
+    <!-- pendulum as the A crossbar, swinging -->
+    <line x1="200" y1="282" x2="262" y2="120" stroke="#c6ff3a" stroke-width="20" stroke-linecap="round"/>
+    <circle cx="200" cy="282" r="14" fill="#c6ff3a"/>
+    <text x="200" y="372" text-anchor="middle" fill="#7e7e78"
+      font-family="JetBrains Mono" font-weight="700" font-size="34" letter-spacing="16">TARIMA</text>
   </svg>
 </div>
 
-<!-- 3 EQ-T -->
+<!-- 3 VINILO NACIENTE (half vinyl rising = donde nace) -->
 <div class="tile" id="l3"><span class="num">3</span>
-  <svg width="360" height="360" viewBox="0 0 360 360">
-    <!-- crossbar of the T as eq bars -->
-    <g fill="#c6ff3a">
-      <rect x="56"  y="96" width="30" height="56" rx="8"/>
-      <rect x="96"  y="76" width="30" height="76" rx="8"/>
-      <rect x="136" y="96" width="30" height="56" rx="8"/>
-      <rect x="176" y="56" width="30" height="96" rx="8"/>
-      <rect x="216" y="88" width="30" height="64" rx="8"/>
-      <rect x="256" y="70" width="30" height="82" rx="8"/>
+  <svg width="400" height="400" viewBox="0 0 400 400">
+    <defs><clipPath id="half"><rect x="0" y="60" width="400" height="208"/></clipPath></defs>
+    <g clip-path="url(#half)">
+      <circle cx="200" cy="268" r="150" fill="#111112" stroke="#2c2c2e" stroke-width="3"/>
+      <circle cx="200" cy="268" r="116" fill="none" stroke="#26262a" stroke-width="3"/>
+      <circle cx="200" cy="268" r="86" fill="none" stroke="#26262a" stroke-width="3"/>
+      <circle cx="200" cy="268" r="54" fill="#c6ff3a"/>
+      <circle cx="200" cy="268" r="8" fill="#0a0a0b"/>
+      <!-- shine -->
+      <path d="M96 180 a150 150 0 0 1 60 -48" fill="none" stroke="#3c3c40" stroke-width="10" stroke-linecap="round"/>
     </g>
-    <!-- stem: one tall bar, glowing -->
-    <rect x="156" y="170" width="50" height="140" rx="10" fill="#c6ff3a"/>
-    <rect x="156" y="170" width="50" height="140" rx="10" fill="#c6ff3a" opacity=".45" filter="blur(18px)"/>
+    <!-- horizon = the stage -->
+    <rect x="40" y="268" width="320" height="18" rx="9" fill="#c6ff3a"/>
+    <text x="200" y="345" text-anchor="middle" fill="#ececE6" font-family="Anton" font-size="56" letter-spacing="4">TARIMA</text>
   </svg>
 </div>
 
-<!-- 4 BOCINA (speech-bubble T) -->
+<!-- 4 TORNAMESA (top view) -->
 <div class="tile" id="l4"><span class="num">4</span>
-  <svg width="360" height="360" viewBox="0 0 360 360">
-    <path d="M60 90 a30 30 0 0 1 30-30 h180 a30 30 0 0 1 30 30 v110 a30 30 0 0 1-30 30 h-95 l-55 60 l8-60 h-38 a30 30 0 0 1-30-30 z"
-      fill="none" stroke="#c6ff3a" stroke-width="18" stroke-linejoin="round"/>
-    <g fill="#ececE6">
-      <rect x="120" y="106" width="120" height="30" rx="8"/>
-      <rect x="165" y="106" width="30" height="98" rx="8"/>
-    </g>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <!-- deck -->
+    <rect x="36" y="56" width="308" height="268" rx="36" fill="none" stroke="#3a3a3c" stroke-width="10"/>
+    <!-- platter -->
+    <circle cx="165" cy="190" r="96" fill="#111112" stroke="#2c2c2e" stroke-width="3"/>
+    <circle cx="165" cy="190" r="70" fill="none" stroke="#26262a" stroke-width="3"/>
+    <circle cx="165" cy="190" r="40" fill="#c6ff3a"/>
+    <circle cx="165" cy="190" r="6" fill="#0a0a0b"/>
+    <!-- tonearm -->
+    <circle cx="306" cy="96" r="20" fill="#ececE6"/>
+    <line x1="306" y1="96" x2="244" y2="210" stroke="#ececE6" stroke-width="12" stroke-linecap="round"/>
+    <line x1="244" y1="210" x2="216" y2="236" stroke="#ececE6" stroke-width="12" stroke-linecap="round"/>
+    <rect x="200" y="228" width="34" height="20" rx="6" fill="#c6ff3a" transform="rotate(-42 217 238)"/>
   </svg>
 </div>
 
-<!-- 5 TA MONOGRAM -->
+<!-- 5 WORDMARK ESCENARIO (slab between stage bars) -->
 <div class="tile" id="l5"><span class="num">5</span>
-  <svg width="380" height="380" viewBox="0 0 380 380">
-    <!-- T solid lime -->
-    <g fill="#c6ff3a">
-      <rect x="48" y="78" width="172" height="48" rx="6"/>
-      <rect x="106" y="78" width="56" height="200" rx="6"/>
-    </g>
-    <!-- A as a bold white outline, interlocked over the T's right side -->
-    <path d="M212 278 L272 84 L332 278 M232 212 L312 212"
-      fill="none" stroke="#ececE6" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>
-    <rect x="48" y="304" width="284" height="14" fill="#9fcf2a"/>
-  </svg>
-</div>
-
-<!-- 6 VINILO -->
-<div class="tile" id="l6"><span class="num">6</span>
-  <svg width="380" height="380" viewBox="0 0 380 380">
-    <circle cx="190" cy="190" r="150" fill="#111112" stroke="#2c2c2e" stroke-width="3"/>
-    <circle cx="190" cy="190" r="118" fill="none" stroke="#222224" stroke-width="2"/>
-    <circle cx="190" cy="190" r="92"  fill="none" stroke="#222224" stroke-width="2"/>
-    <circle cx="190" cy="190" r="64" fill="#c6ff3a"/>
-    <circle cx="190" cy="190" r="9" fill="#0a0a0b"/>
-    <text x="190" y="212" text-anchor="middle" fill="#0a0a0b" font-family="Anton" font-size="58">T</text>
-    <!-- needle = playhead at 2 o'clock -->
-    <line x1="190" y1="190" x2="296" y2="84" stroke="#ececE6" stroke-width="10" stroke-linecap="round"/>
-    <circle cx="296" cy="84" r="16" fill="#ececE6"/>
-  </svg>
-</div>
-
-<!-- 7 PLAYHEAD T -->
-<div class="tile" id="l7"><span class="num">7</span>
-  <svg width="380" height="380" viewBox="0 0 380 380">
-    <!-- crossbar: timeline with beat ticks -->
-    <rect x="50" y="120" width="280" height="12" rx="6" fill="#3a3a3c"/>
-    <g fill="#6f6f72">
-      <rect x="78"  y="104" width="12" height="44" rx="6"/>
-      <rect x="148" y="104" width="12" height="44" rx="6"/>
-      <rect x="288" y="104" width="12" height="44" rx="6"/>
-    </g>
-    <!-- stem: glowing playhead crossing the timeline -->
-    <rect x="206" y="58" width="18" height="252" rx="9" fill="#c6ff3a"/>
-    <rect x="206" y="58" width="18" height="252" rx="9" fill="#c6ff3a" opacity=".5" filter="blur(16px)"/>
-    <circle cx="215" cy="58" r="14" fill="#c6ff3a"/>
-  </svg>
-</div>
-
-<!-- 8 WORDMARK CROP -->
-<div class="tile" id="l8"><span class="num">8</span>
-  <div class="anton" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 28px;line-height:.78">
-    <span style="font-size:172px;color:#ececE6;letter-spacing:-0.01em">TARI</span>
-    <span style="font-size:172px;letter-spacing:-0.01em"><span style="color:#ececE6">MA</span><span style="color:#c6ff3a">.</span></span>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:26px">
+    <div style="width:330px;height:14px;background:#3a3a3c;border-radius:99px"></div>
+    <div class="anton" style="font-size:110px;line-height:1;color:#ececE6">TARIMA</div>
+    <div style="width:330px;height:14px;background:#c6ff3a;border-radius:99px;box-shadow:0 0 30px rgba(198,255,58,.45)"></div>
   </div>
 </div>
 
-<!-- 9 CORONA GALLO -->
-<div class="tile" id="l9"><span class="num">9</span>
-  <svg width="360" height="360" viewBox="0 0 360 360">
-    <!-- crest/corona (gallos) -->
-    <polyline points="100,118 130,74 160,108 190,60 220,108 250,74 280,118"
-      fill="none" stroke="#c6ff3a" stroke-width="20" stroke-linejoin="round" stroke-linecap="round"/>
-    <!-- T -->
-    <g fill="#ececE6">
-      <rect x="100" y="150" width="180" height="44" rx="10"/>
-      <rect x="158" y="150" width="64" height="150" rx="10"/>
+<!-- 6 WORDMARK APILADO -->
+<div class="tile" id="l6"><span class="num">6</span>
+  <div class="anton" style="display:flex;flex-direction:column;line-height:.96;text-align:center">
+    <span style="font-size:135px;color:#ececE6">TA</span>
+    <span style="font-size:135px;color:#c6ff3a">RI</span>
+    <span style="font-size:135px;color:#ececE6">MA</span>
+  </div>
+</div>
+
+<!-- 7 MIC DE BATALLA -->
+<div class="tile" id="l7"><span class="num">7</span>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <defs><clipPath id="ball"><circle cx="190" cy="148" r="86"/></clipPath></defs>
+    <!-- grille ball -->
+    <circle cx="190" cy="148" r="86" fill="#16161a"/>
+    <g clip-path="url(#ball)" stroke="#c6ff3a" stroke-width="7">
+      <line x1="104" y1="118" x2="276" y2="118"/>
+      <line x1="104" y1="148" x2="276" y2="148"/>
+      <line x1="104" y1="178" x2="276" y2="178"/>
+      <line x1="130" y1="62" x2="130" y2="234"/>
+      <line x1="160" y1="62" x2="160" y2="234"/>
+      <line x1="190" y1="62" x2="190" y2="234"/>
+      <line x1="220" y1="62" x2="220" y2="234"/>
+      <line x1="250" y1="62" x2="250" y2="234"/>
     </g>
+    <circle cx="190" cy="148" r="86" fill="none" stroke="#ececE6" stroke-width="12"/>
+    <!-- collar + chunky handle, slight tilt -->
+    <g transform="rotate(12 190 250)">
+      <rect x="152" y="230" width="76" height="30" rx="10" fill="#ececE6"/>
+      <path d="M160 260 h60 l-12 92 h-36 z" fill="#ececE6"/>
+      <rect x="170" y="282" width="40" height="10" rx="5" fill="#9fcf2a"/>
+    </g>
+  </svg>
+</div>
+
+<!-- 8 BOOMBOX -->
+<div class="tile" id="l8"><span class="num">8</span>
+  <svg width="400" height="400" viewBox="0 0 400 400">
+    <!-- handle -->
+    <path d="M140 96 v-22 a14 14 0 0 1 14-14 h92 a14 14 0 0 1 14 14 v22" fill="none" stroke="#3a3a3c" stroke-width="14" stroke-linecap="round"/>
+    <!-- body -->
+    <rect x="44" y="96" width="312" height="200" rx="28" fill="none" stroke="#ececE6" stroke-width="14"/>
+    <!-- speakers -->
+    <circle cx="124" cy="196" r="52" fill="none" stroke="#c6ff3a" stroke-width="14"/>
+    <circle cx="124" cy="196" r="14" fill="#c6ff3a"/>
+    <circle cx="276" cy="196" r="52" fill="none" stroke="#c6ff3a" stroke-width="14"/>
+    <circle cx="276" cy="196" r="14" fill="#c6ff3a"/>
+    <!-- tape deck -->
+    <rect x="178" y="170" width="44" height="30" rx="6" fill="#3a3a3c"/>
+    <rect x="178" y="216" width="44" height="14" rx="7" fill="#9fcf2a"/>
+    <text x="200" y="352" text-anchor="middle" fill="#7e7e78" font-family="JetBrains Mono" font-weight="700" font-size="30" letter-spacing="14">TARIMA</text>
+  </svg>
+</div>
+
+<!-- 9 TAG GRAFFITI T (drip) -->
+<div class="tile" id="l9"><span class="num">9</span>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <defs>
+      <filter id="wob"><feTurbulence baseFrequency="0.06" numOctaves="2" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="9"/></filter>
+    </defs>
+    <g filter="url(#wob)" fill="#c6ff3a">
+      <!-- T with attitude: slanted crossbar -->
+      <polygon points="64,108 318,78 322,138 76,166"/>
+      <polygon points="160,130 232,122 224,300 172,306"/>
+      <!-- drips -->
+      <path d="M104 160 q6 0 7 10 l3 52 q1 14 -10 14 q-10 0 -9 -14 l3 -52 q1 -10 6 -10z"/>
+      <path d="M282 122 q6 0 7 10 l4 84 q1 14 -11 14 q-10 0 -9 -14 l3 -84 q1 -10 6 -10z"/>
+      <path d="M196 306 q6 0 7 10 l2 26 q1 12 -9 12 q-9 0 -8 -12 l2 -26 q1 -10 6 -10z"/>
+    </g>
+    <text x="190" y="364" text-anchor="middle" fill="#5a5a5c" font-family="JetBrains Mono" font-weight="700" font-size="24" letter-spacing="12">TARIMA</text>
   </svg>
 </div>
 
