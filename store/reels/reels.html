@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--fg:#ececE6;--lime:#c6ff3a;--ink:#0a0a0b;--muted:#7e7e78}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000}
+#stage{width:1080px;height:1920px;background:radial-gradient(130% 90% at 50% 20%, #131410 0%, #0a0a0b 60%);
+  position:relative;overflow:hidden;font-family:Archivo;color:var(--fg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
+.anton{font-family:Anton;text-transform:uppercase;line-height:.84}
+.meta{position:absolute;font:700 30px 'JetBrains Mono';letter-spacing:.25em;color:#58584f;text-transform:uppercase}
+.meta.tl{top:70px;left:64px}.meta.tr{top:70px;right:64px}.meta.b{bottom:70px;width:100%;text-align:center;left:0}
+#flash{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 42%, rgba(198,255,58,.20), transparent 55%);opacity:0}
+.hidden{display:none!important}
+.dotrow{display:flex;gap:26px;justify-content:center}
+.dot{width:22px;height:22px;border-radius:50%;background:#2a2a2c}
+.dot.on{background:var(--lime);box-shadow:0 0 26px rgba(198,255,58,.9);transform:scale(1.5)}
+.bar{width:520px;height:10px;border-radius:99px;background:#222;overflow:hidden;margin:44px auto 0}
+.bar>div{height:100%;background:var(--lime);box-shadow:0 0 12px rgba(198,255,58,.7)}
+.eqrow{display:flex;align-items:flex-end;gap:18px;height:420px;justify-content:center}
+.eqb{width:64px;background:linear-gradient(to top,#2f3f10,var(--lime));border-radius:12px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <span class="meta tl" id="mTL">Tarima</span>
+  <span class="meta tr" id="mTR"></span>
+  <span class="meta b" id="mB">@tarimafreestyle</span>
+  <div id="flash"></div>
+  <div id="content" style="text-align:center;position:relative;width:100%;padding:0 80px"></div>
+</div>
+
+<script>
+const Q = new URLSearchParams(location.search);
+const REEL = Number(Q.get('reel') || 1);
+
+// Per-reel timing: [bpm]. t=0 in renderAt == beat 1 of bar 1 of the track.
+const CFG = {
+  1: { bpm: 88, label: 'Así se entrena' },
+  2: { bpm: 92, label: 'Esquemas de rima' },
+  3: { bpm: 86, label: 'Donde nace el freestyle' },
+}[REEL];
+const BEAT = 60 / CFG.bpm, BAR = BEAT * 4;
+
+const content = document.getElementById('content');
+const flash = document.getElementById('flash');
+document.getElementById('mTR').textContent = CFG.label;
+
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+// Punch on each beat: 1 at beat start, decays fast.
+const punch = (t) => Math.pow(Math.max(0, 1 - (t % BEAT) / (BEAT * 0.55)), 2);
+const beatIdx = (t) => Math.floor(t / BEAT) % 4;
+const barIdx = (t) => Math.floor(t / BAR);
+const barFrac = (t) => (t % BAR) / BAR;
+
+const dots = (t, on) => `<div class="dotrow">${[0,1,2,3].map(i =>
+  `<span class="dot ${on && i === beatIdx(t) ? 'on' : ''}"></span>`).join('')}</div>`;
+
+// Deterministic pseudo-random for eq bars (no Math.random: frames must be reproducible)
+const prand = (i, k) => 0.5 + 0.5 * Math.sin(i * 12.9898 + k * 78.233);
+
+// ── R1: product demo ───────────────────────────────────────────────
+const R1_WORDS = ['CALLE','DETALLE','PAPEL','CARTEL'];
+function r1(t) {
+  const bar = barIdx(t);
+  if (bar < 1) { // intro slam
+    const k = easeOut(Math.min(1, t / (BAR * 0.5)));
+    return `<div class="anton" style="font-size:300px;transform:scale(${0.7 + 0.3 * k});opacity:${k}">Tarima</div>
+      <p style="font:700 34px Archivo;letter-spacing:.4em;color:var(--muted);margin-top:40px;opacity:${k}">DONDE NACE EL FREESTYLE</p>`;
+  }
+  if (bar <= 4) { // gameplay
+    const w = R1_WORDS[(bar - 1) % 4];
+    const next = R1_WORDS[bar % 4];
+    const reveal = easeOut(Math.min(1, (t % BAR) / 0.25));
+    const s = 1 + 0.06 * punch(t);
+    return `
+      <p style="font:700 30px Archivo;letter-spacing:.4em;color:var(--muted);margin-bottom:70px">UNA PALABRA POR BARRA</p>
+      <div class="anton" style="font-size:240px;color:var(--lime);transform:scale(${(0.92 + 0.08 * reveal) * s});opacity:${reveal}">${w}</div>
+      <div class="bar"><div style="width:${barFrac(t) * 100}%"></div></div>
+      <div style="margin-top:46px">${dots(t, true)}</div>
+      <p style="font:700 34px Archivo;letter-spacing:.2em;color:var(--muted);margin-top:90px">SIGUE&nbsp;&nbsp;<span style="color:var(--fg);font-family:Anton;font-size:64px;letter-spacing:0">${next}</span>
+      ${(bar % 2 === 1) ? '<span style="color:var(--lime);font-size:26px;letter-spacing:.2em">&nbsp;&nbsp;RIMA</span>' : ''}</p>`;
+  }
+  // CTA
+  const k = easeOut(Math.min(1, (t - 5 * BAR) / 0.4));
+  const s = 1 + 0.05 * punch(t);
+  return `<div class="anton" style="font-size:170px;opacity:${k};transform:scale(${s})">Entrenar<br>freestyle<br><span style="color:var(--lime)">de verdad.</span></div>
+    <p style="font:800 44px Archivo;letter-spacing:.2em;color:var(--ink);background:var(--lime);display:inline-block;
+       padding:26px 64px;border-radius:999px;margin-top:80px;opacity:${k}">GRATIS · ANDROID Y WEB</p>`;
+}
+
+// ── R2: rhyme schemes ──────────────────────────────────────────────
+const SCHEMES = [
+  { name: 'PAREADA',  code: 'AABB', words: ['MANO','HERMANO','PAPEL','CARTEL'],  rhyme: [0,0,1,1] },
+  { name: 'CRUZADA',  code: 'ABAB', words: ['CALOR','PAPEL','MOTOR','CARTEL'],  rhyme: [0,1,0,1] },
+  { name: 'ABRAZADA', code: 'ABBA', words: ['CANCIÓN','CALLE','DETALLE','RAZÓN'], rhyme: [0,1,1,0] },
+  { name: 'MONORRIMA',code: 'AAAA', words: ['ACCIÓN','PASIÓN','CANCIÓN','RAZÓN'], rhyme: [0,0,0,0] },
+];
+function r2(t) {
+  const bar = barIdx(t);
+  if (bar < 1) {
+    const k = easeOut(Math.min(1, t / (BAR * 0.5)));
+    return `<div class="anton" style="font-size:150px;opacity:${k};transform:translateY(${(1-k)*60}px)">4 esquemas<br>de <span style="color:var(--lime)">rima</span></div>
+      <p style="font:700 32px Archivo;letter-spacing:.35em;color:var(--muted);margin-top:50px;opacity:${k}">UNA PALABRA POR BEAT</p>`;
+  }
+  if (bar <= 4) {
+    const sc = SCHEMES[bar - 1];
+    const b = beatIdx(t);
+    const rows = sc.words.map((w, i) => {
+      const shown = i <= b;
+      const isLime = sc.rhyme[i] === 0;
+      const k = i === b ? easeOut(Math.min(1, (t % BEAT) / 0.18)) : 1;
+      return `<div style="display:flex;align-items:baseline;gap:36px;justify-content:center;opacity:${shown ? k : 0.12};transform:translateX(${shown ? 0 : 20}px)">
+        <span class="anton" style="font-size:64px;color:${isLime ? 'var(--lime)' : '#6f6f72'};width:70px;text-align:right">${sc.code[i]}</span>
+        <span class="anton" style="font-size:110px;color:${isLime ? 'var(--lime)' : 'var(--fg)'}">${w}</span></div>`;
+    }).join('<div style="height:26px"></div>');
+    return `<p class="anton" style="font-size:72px;color:var(--fg);margin-bottom:16px">${sc.name}</p>
+      <p style="font:700 34px 'JetBrains Mono';letter-spacing:.5em;color:var(--muted);margin-bottom:70px">${sc.code}</p>
+      ${rows}<div style="margin-top:80px">${dots(t, true)}</div>`;
+  }
+  const k = easeOut(Math.min(1, (t - 5 * BAR) / 0.4));
+  return `<div class="anton" style="font-size:160px;opacity:${k}">Elegir esquema<span style="color:var(--lime)">.</span><br>Entrenar<span style="color:var(--lime)">.</span></div>
+    <p style="font:800 42px Archivo;letter-spacing:.2em;color:var(--ink);background:var(--lime);display:inline-block;padding:26px 60px;border-radius:999px;margin-top:80px;opacity:${k}">TARIMA · LINK EN BIO</p>`;
+}
+
+// ── R3: hype ───────────────────────────────────────────────────────
+const R3_SLAM = ['EL FLOW','NO SE','COMPRA.','SE ENTRENA.'];
+function r3(t) {
+  const bar = barIdx(t);
+  if (bar < 2) { // one word per beat, slamming
+    const idx = Math.min(7, Math.floor(t / BEAT));
+    const w = R3_SLAM[idx % 4];
+    const lime = w === 'SE ENTRENA.';
+    const k = easeOut(Math.min(1, (t % BEAT) / 0.16));
+    return `<div class="anton" style="font-size:${lime ? 190 : 230}px;color:${lime ? 'var(--lime)' : 'var(--fg)'};
+      transform:scale(${1.25 - 0.25 * k});opacity:${k}">${w}</div>`;
+  }
+  if (bar < 4) { // eq + wordmark
+    const bars = [0,1,2,3,4,5,6].map(i => {
+      const h = 18 + 82 * prand(i, Math.floor(t / BEAT)) * (0.45 + 0.55 * punch(t));
+      return `<div class="eqb" style="height:${h}%"></div>`;
+    }).join('');
+    const s = 1 + 0.05 * punch(t);
+    return `<div class="eqrow">${bars}</div>
+      <div class="anton" style="font-size:250px;margin-top:90px;transform:scale(${s})">Tarima</div>
+      <p style="font:700 34px Archivo;letter-spacing:.4em;color:var(--muted);margin-top:30px">DONDE NACE EL FREESTYLE</p>`;
+  }
+  // crest + CTA
+  const k = easeOut(Math.min(1, (t - 4 * BAR) / 0.4));
+  const s = 1 + 0.06 * punch(t);
+  return `<svg width="340" height="160" viewBox="0 0 240 120" style="opacity:${k}">
+      <polyline points="40,96 70,48 100,84 120,36 140,84 170,48 200,96" fill="none" stroke="#c6ff3a" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/></svg>
+    <div class="anton" style="font-size:185px;opacity:${k};transform:scale(${s})">Subir a<br>la <span style="color:var(--lime)">tarima</span></div>
+    <p style="font:800 44px Archivo;letter-spacing:.2em;color:var(--ink);background:var(--lime);display:inline-block;padding:28px 70px;border-radius:999px;margin-top:90px;opacity:${k}">GRATIS · LINK EN BIO</p>`;
+}
+
+const RENDER = { 1: r1, 2: r2, 3: r3 }[REEL];
+
+// Driven from Playwright: window.renderAt(seconds)
+window.renderAt = (t) => {
+  content.innerHTML = RENDER(t);
+  flash.style.opacity = String(0.85 * punch(t));
+  return true;
+};
+window.renderAt(0);
+</script>
+</body>
+</html>

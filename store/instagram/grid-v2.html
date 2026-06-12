@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tarima — grid v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--fg:#ececE6;--lime:#c6ff3a;--dim:#9fcf2a;--ink:#0a0a0b;--muted:#7e7e78}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;display:grid;grid-template-columns:repeat(3,1080px);gap:6px;width:calc(3240px + 12px);padding:0}
+.post{width:1080px;height:1080px;position:relative;overflow:hidden;font-family:Archivo;
+  display:flex;flex-direction:column;justify-content:center;align-items:center}
+.dark{background:radial-gradient(120% 120% at 30% 20%, #131410 0%, #0a0a0b 60%);color:var(--fg)}
+.lime{background:var(--lime);color:var(--ink)}
+.anton{font-family:Anton;text-transform:uppercase;line-height:.82}
+.meta{position:absolute;font:700 22px 'JetBrains Mono';letter-spacing:.25em;text-transform:uppercase}
+.dark .meta{color:#58584f}.lime .meta{color:rgba(10,10,11,.45)}
+.meta.tl{top:44px;left:52px}.meta.tr{top:44px;right:52px}.meta.bl{bottom:44px;left:52px}.meta.br{bottom:44px;right:52px}
+.eqrow{display:flex;align-items:flex-end;gap:14px}
+.chip{display:inline-block;border-radius:999px;font-weight:800;text-transform:uppercase;letter-spacing:.18em}
+</style>
+</head>
+<body>
+
+<!-- ROW 1 ──────────────────────────────────────────────── -->
+
+<!-- 01 LIME · YA DISPONIBLE -->
+<div class="post lime" id="g1">
+  <span class="meta tl">Tarima</span><span class="meta tr">01</span>
+  <span class="meta bl">@tarimafreestyle</span><span class="meta br">2026</span>
+  <div class="anton" style="font-size:200px;text-align:center">YA<br>DISPO<br>NIBLE</div>
+  <div style="margin-top:54px" class="chip" style=""> </div>
+  <div class="chip" style="background:#0a0a0b;color:#c6ff3a;padding:20px 54px;font-size:30px;margin-top:48px">Gratis · Android y Web</div>
+</div>
+
+<!-- 02 DARK · WORDMARK -->
+<div class="post dark" id="g2">
+  <span class="meta tl">Est. 2026</span><span class="meta tr">02</span>
+  <span class="meta bl">London / LatAm</span><span class="meta br">Freestyle</span>
+  <div class="anton" style="font-size:290px;color:var(--fg)">Tarima</div>
+  <div style="display:flex;align-items:center;gap:20px;margin-top:40px">
+    <span style="height:2px;width:70px;background:rgba(198,255,58,.5)"></span>
+    <span style="font:700 26px Archivo;letter-spacing:.34em;color:var(--muted);text-transform:uppercase">Donde nace el freestyle</span>
+    <span style="height:2px;width:70px;background:rgba(198,255,58,.5)"></span>
+  </div>
+</div>
+
+<!-- 03 DARK · EQ PATTERN -->
+<div class="post dark" id="g3">
+  <span class="meta tl">Beats</span><span class="meta tr">03</span>
+  <span class="meta bl">81–99 BPM</span><span class="meta br">Boom bap+</span>
+  <div class="eqrow" style="height:560px">
+    <div style="width:74px;height:38%;background:#2a2a2c;border-radius:14px"></div>
+    <div style="width:74px;height:66%;background:var(--lime);border-radius:14px"></div>
+    <div style="width:74px;height:48%;background:#2a2a2c;border-radius:14px"></div>
+    <div style="width:74px;height:100%;background:var(--lime);border-radius:14px;box-shadow:0 0 60px rgba(198,255,58,.45)"></div>
+    <div style="width:74px;height:58%;background:#2a2a2c;border-radius:14px"></div>
+    <div style="width:74px;height:80%;background:var(--lime);border-radius:14px"></div>
+    <div style="width:74px;height:30%;background:#2a2a2c;border-radius:14px"></div>
+  </div>
+  <p class="anton" style="font-size:64px;color:var(--fg);margin-top:60px">Beats reales<span style="color:var(--lime)">.</span></p>
+</div>
+
+<!-- ROW 2 ──────────────────────────────────────────────── -->
+
+<!-- 04 DARK · MANIFIESTO -->
+<div class="post dark" id="g4" style="align-items:flex-start;padding:0 96px">
+  <span class="meta tl">Manifiesto</span><span class="meta tr">04</span>
+  <span class="meta bl">@tarimafreestyle</span>
+  <div class="anton" style="font-size:118px">
+    <div style="color:var(--fg)">El flow</div>
+    <div style="color:var(--fg)">no se compra<span style="color:var(--lime)">.</span></div>
+    <div style="color:var(--lime);margin-top:30px">Se entrena<span style="color:var(--fg)">.</span></div>
+  </div>
+</div>
+
+<!-- 05 LIME · APP SHOT (center tile) -->
+<div class="post lime" id="g5">
+  <span class="meta tl">La app</span><span class="meta tr">05</span>
+  <span class="meta bl">Palabras al ritmo</span><span class="meta br">Link en bio</span>
+  <div style="width:430px;height:920px;border-radius:54px;background:#0a0a0b;padding:14px;
+       box-shadow:0 40px 90px rgba(10,10,11,.45)">
+    <img src="viz-tipo.png" style="width:100%;height:100%;object-fit:cover;border-radius:42px" alt="">
+  </div>
+</div>
+
+<!-- 06 DARK · PALABRA AL RITMO -->
+<div class="post dark" id="g6">
+  <span class="meta tl">Al ritmo</span><span class="meta tr">06</span>
+  <span class="meta bl">Barra a barra</span><span class="meta br">4/4</span>
+  <div class="anton" style="font-size:210px;color:var(--lime);text-shadow:0 0 80px rgba(198,255,58,.35)">Calle</div>
+  <div style="display:flex;gap:22px;margin-top:70px">
+    <span style="width:18px;height:18px;border-radius:50%;background:var(--lime)"></span>
+    <span style="width:18px;height:18px;border-radius:50%;background:#2a2a2c"></span>
+    <span style="width:18px;height:18px;border-radius:50%;background:#2a2a2c"></span>
+    <span style="width:18px;height:18px;border-radius:50%;background:#2a2a2c"></span>
+  </div>
+  <div style="width:380px;height:8px;border-radius:99px;background:#222;margin-top:36px;overflow:hidden">
+    <div style="width:25%;height:100%;background:var(--lime)"></div>
+  </div>
+  <p style="font:700 26px Archivo;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:60px">La palabra cae en el beat</p>
+</div>
+
+<!-- ROW 3 ──────────────────────────────────────────────── -->
+
+<!-- 07 DARK · DICCIONARIO -->
+<div class="post dark" id="g7" style="align-items:flex-start;padding:0 96px">
+  <span class="meta tl">Diccionario</span><span class="meta tr">07</span>
+  <span class="meta bl">Consonante / asonante</span>
+  <div class="anton" style="font-size:150px;color:var(--fg)">Flow<span style="color:var(--lime)">…</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:22px;margin-top:54px;max-width:860px">
+    <span class="chip" style="border:3px solid rgba(198,255,58,.5);color:var(--lime);padding:18px 40px;font-size:34px">control</span>
+    <span class="chip" style="border:3px solid rgba(198,255,58,.5);color:var(--lime);padding:18px 40px;font-size:34px">motor</span>
+    <span class="chip" style="border:3px solid rgba(198,255,58,.5);color:var(--lime);padding:18px 40px;font-size:34px">reloj</span>
+    <span class="chip" style="border:3px solid rgba(198,255,58,.5);color:var(--lime);padding:18px 40px;font-size:34px">calor</span>
+    <span class="chip" style="border:3px solid rgba(198,255,58,.5);color:var(--lime);padding:18px 40px;font-size:34px">voz</span>
+  </div>
+  <p style="font:700 26px Archivo;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:64px">Toda la familia de rimas</p>
+</div>
+
+<!-- 08 LIME · SIN CUENTAS -->
+<div class="post lime" id="g8" style="align-items:flex-start;padding:0 96px">
+  <span class="meta tl">Privacidad</span><span class="meta tr">08</span>
+  <span class="meta bl">Todo queda en el dispositivo</span>
+  <div class="anton" style="font-size:128px;color:var(--ink)">
+    <div>Sin cuentas.</div>
+    <div>Sin anuncios.</div>
+    <div>Sin recopilar</div>
+    <div>datos<span style="color:#fff">.</span></div>
+  </div>
+</div>
+
+<!-- 09 DARK · CTA -->
+<div class="post dark" id="g9">
+  <span class="meta tl">Gratis</span><span class="meta tr">09</span>
+  <span class="meta bl">tarima-tau.vercel.app</span><span class="meta br">Android · Web</span>
+  <svg width="240" height="120" viewBox="0 0 240 120" style="margin-bottom:30px">
+    <polyline points="40,96 70,48 100,84 120,36 140,84 170,48 200,96"
+      fill="none" stroke="#c6ff3a" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>
+  <div class="anton" style="font-size:170px;text-align:center;color:var(--fg)">Subir a<br>la <span style="color:var(--lime)">tarima</span></div>
+  <div class="chip" style="background:var(--lime);color:var(--ink);padding:22px 60px;font-size:32px;margin-top:64px">Link en bio</div>
+</div>
+
+</body>
+</html>

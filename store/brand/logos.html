@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tarima — 9 logos</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--fg:#ececE6;--lime:#c6ff3a;--dim:#9fcf2a;--ink:#0a0a0b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1b1b1d;font-family:Archivo;display:flex;flex-wrap:wrap;gap:24px;padding:24px;justify-content:center}
+.tile{width:512px;height:512px;border-radius:116px;overflow:hidden;position:relative;
+  background:radial-gradient(140% 140% at 30% 20%, #16170f 0%, #0a0a0b 55%);
+  display:flex;align-items:center;justify-content:center}
+.tile .num{position:absolute;top:18px;left:26px;color:#555;font:700 20px 'JetBrains Mono';z-index:9}
+.anton{font-family:Anton;text-transform:uppercase}
+svg{display:block}
+
+/* 1 PODIO — the tarima itself: stage + mic */
+/* 2 STENCIL — spray stencil T */
+/* 3 EQ-T — T built of equalizer bars */
+/* 4 BOCINA — speech-bubble T */
+/* 5 TA monogram */
+/* 6 VINILO */
+/* 7 PLAYHEAD T */
+/* 8 WORDMARK crop */
+/* 9 CORONA gallo */
+</style>
+</head>
+<body>
+
+<!-- 1 PODIO -->
+<div class="tile" id="l1"><span class="num">1</span>
+  <svg width="360" height="360" viewBox="0 0 360 360">
+    <!-- mic on a straight stand, planted on the tarima -->
+    <circle cx="180" cy="92" r="40" fill="#c6ff3a"/>
+    <rect x="172" y="132" width="16" height="100" rx="8" fill="#ececE6"/>
+    <path d="M140 244 h80" stroke="#ececE6" stroke-width="14" stroke-linecap="round"/>
+    <path d="M180 232 v12" stroke="#ececE6" stroke-width="14"/>
+    <!-- stage -->
+    <rect x="44" y="258" width="272" height="34" rx="10" fill="#c6ff3a"/>
+    <rect x="60" y="292" width="22" height="26" rx="4" fill="#3a3a3c"/>
+    <rect x="278" y="292" width="22" height="26" rx="4" fill="#3a3a3c"/>
+  </svg>
+</div>
+
+<!-- 2 STENCIL -->
+<div class="tile" id="l2"><span class="num">2</span>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <defs>
+      <filter id="rough"><feTurbulence baseFrequency="0.55" numOctaves="2" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+    </defs>
+    <g filter="url(#rough)" fill="#c6ff3a">
+      <!-- crossbar in two pieces (stencil bridges at the stem) -->
+      <polygon points="56,88 158,88 150,152 56,152"/>
+      <polygon points="222,88 324,88 324,152 214,152"/>
+      <!-- stem in two pieces (bridge at middle) -->
+      <polygon points="166,88 214,88 208,196 164,196"/>
+      <polygon points="162,212 206,212 196,318 152,318"/>
+    </g>
+    <text x="190" y="356" text-anchor="middle" fill="#5a5a5c"
+      font-family="JetBrains Mono" font-weight="700" font-size="24" letter-spacing="12">TARIMA</text>
+  </svg>
+</div>
+
+<!-- 3 EQ-T -->
+<div class="tile" id="l3"><span class="num">3</span>
+  <svg width="360" height="360" viewBox="0 0 360 360">
+    <!-- crossbar of the T as eq bars -->
+    <g fill="#c6ff3a">
+      <rect x="56"  y="96" width="30" height="56" rx="8"/>
+      <rect x="96"  y="76" width="30" height="76" rx="8"/>
+      <rect x="136" y="96" width="30" height="56" rx="8"/>
+      <rect x="176" y="56" width="30" height="96" rx="8"/>
+      <rect x="216" y="88" width="30" height="64" rx="8"/>
+      <rect x="256" y="70" width="30" height="82" rx="8"/>
+    </g>
+    <!-- stem: one tall bar, glowing -->
+    <rect x="156" y="170" width="50" height="140" rx="10" fill="#c6ff3a"/>
+    <rect x="156" y="170" width="50" height="140" rx="10" fill="#c6ff3a" opacity=".45" filter="blur(18px)"/>
+  </svg>
+</div>
+
+<!-- 4 BOCINA (speech-bubble T) -->
+<div class="tile" id="l4"><span class="num">4</span>
+  <svg width="360" height="360" viewBox="0 0 360 360">
+    <path d="M60 90 a30 30 0 0 1 30-30 h180 a30 30 0 0 1 30 30 v110 a30 30 0 0 1-30 30 h-95 l-55 60 l8-60 h-38 a30 30 0 0 1-30-30 z"
+      fill="none" stroke="#c6ff3a" stroke-width="18" stroke-linejoin="round"/>
+    <g fill="#ececE6">
+      <rect x="120" y="106" width="120" height="30" rx="8"/>
+      <rect x="165" y="106" width="30" height="98" rx="8"/>
+    </g>
+  </svg>
+</div>
+
+<!-- 5 TA MONOGRAM -->
+<div class="tile" id="l5"><span class="num">5</span>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <!-- T solid lime -->
+    <g fill="#c6ff3a">
+      <rect x="48" y="78" width="172" height="48" rx="6"/>
+      <rect x="106" y="78" width="56" height="200" rx="6"/>
+    </g>
+    <!-- A as a bold white outline, interlocked over the T's right side -->
+    <path d="M212 278 L272 84 L332 278 M232 212 L312 212"
+      fill="none" stroke="#ececE6" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="48" y="304" width="284" height="14" fill="#9fcf2a"/>
+  </svg>
+</div>
+
+<!-- 6 VINILO -->
+<div class="tile" id="l6"><span class="num">6</span>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <circle cx="190" cy="190" r="150" fill="#111112" stroke="#2c2c2e" stroke-width="3"/>
+    <circle cx="190" cy="190" r="118" fill="none" stroke="#222224" stroke-width="2"/>
+    <circle cx="190" cy="190" r="92"  fill="none" stroke="#222224" stroke-width="2"/>
+    <circle cx="190" cy="190" r="64" fill="#c6ff3a"/>
+    <circle cx="190" cy="190" r="9" fill="#0a0a0b"/>
+    <text x="190" y="212" text-anchor="middle" fill="#0a0a0b" font-family="Anton" font-size="58">T</text>
+    <!-- needle = playhead at 2 o'clock -->
+    <line x1="190" y1="190" x2="296" y2="84" stroke="#ececE6" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="296" cy="84" r="16" fill="#ececE6"/>
+  </svg>
+</div>
+
+<!-- 7 PLAYHEAD T -->
+<div class="tile" id="l7"><span class="num">7</span>
+  <svg width="380" height="380" viewBox="0 0 380 380">
+    <!-- crossbar: timeline with beat ticks -->
+    <rect x="50" y="120" width="280" height="12" rx="6" fill="#3a3a3c"/>
+    <g fill="#6f6f72">
+      <rect x="78"  y="104" width="12" height="44" rx="6"/>
+      <rect x="148" y="104" width="12" height="44" rx="6"/>
+      <rect x="288" y="104" width="12" height="44" rx="6"/>
+    </g>
+    <!-- stem: glowing playhead crossing the timeline -->
+    <rect x="206" y="58" width="18" height="252" rx="9" fill="#c6ff3a"/>
+    <rect x="206" y="58" width="18" height="252" rx="9" fill="#c6ff3a" opacity=".5" filter="blur(16px)"/>
+    <circle cx="215" cy="58" r="14" fill="#c6ff3a"/>
+  </svg>
+</div>
+
+<!-- 8 WORDMARK CROP -->
+<div class="tile" id="l8"><span class="num">8</span>
+  <div class="anton" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 28px;line-height:.78">
+    <span style="font-size:172px;color:#ececE6;letter-spacing:-0.01em">TARI</span>
+    <span style="font-size:172px;letter-spacing:-0.01em"><span style="color:#ececE6">MA</span><span style="color:#c6ff3a">.</span></span>
+  </div>
+</div>
+
+<!-- 9 CORONA GALLO -->
+<div class="tile" id="l9"><span class="num">9</span>
+  <svg width="360" height="360" viewBox="0 0 360 360">
+    <!-- crest/corona (gallos) -->
+    <polyline points="100,118 130,74 160,108 190,60 220,108 250,74 280,118"
+      fill="none" stroke="#c6ff3a" stroke-width="20" stroke-linejoin="round" stroke-linecap="round"/>
+    <!-- T -->
+    <g fill="#ececE6">
+      <rect x="100" y="150" width="180" height="44" rx="10"/>
+      <rect x="158" y="150" width="64" height="150" rx="10"/>
+    </g>
+  </svg>
+</div>
+
+</body>
+</html>
