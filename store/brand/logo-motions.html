@@ -14,7 +14,7 @@ body{background:#000}
 <script>
 const Q = new URLSearchParams(location.search);
 const V = Number(Q.get('v') || 1);
-const BPMS = { 1: 88, 2: 92, 3: 86, 4: 88, 5: 92 };
+const BPMS = { 1: 86, 2: 92, 3: 86, 4: 92, 5: 92 };
 const BPM = BPMS[V], BEAT = 60 / BPM, BAR = BEAT * 4;
 
 const LIME = '#c6ff3a', INK = '#0a0a0b', BONE = '#ececE6';
@@ -143,7 +143,7 @@ function v5(t) {
   return { dark: false, html: `
     ${mark({ rise: 1, rot, showName: false, cy: 560 })}
     <svg width="1080" height="1080" viewBox="0 0 1080 1080" style="position:absolute;inset:0">${bars}</svg>
-    <div style="position:absolute;left:0;right:0;top:824px;text-align:center;font-family:Anton;
+    <div style="position:absolute;left:0;right:0;top:758px;text-align:center;font-family:Anton;
       font-size:104px;letter-spacing:8px;color:${INK};transform:scale(${1 + 0.025 * punch(t)})">TARIMA</div>
     ${flashLayer(0.35 * punch(t), false)}` };
 }

@@ -52,15 +52,6 @@ export const BEAT_TRACKS: BeatTrack[] = [
     source: 'https://pixabay.com/music/beats-minimal-90s-rap-beat-312554/',
   },
   {
-    id: 'leberch-hip-hop', name: 'Hip Hop', artist: 'Leberch',
-    style: 'boom-bap', tags: ['boom-bap', 'classic'], bpm: 88,
-    bar1OffsetSec: 1.72,
-    src: '/beats-v2/leberch-hip-hop.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-hip-hop-516914/',
-  },
-  {
     id: 'aspieduck-1-weirdo', name: '1 Weirdo', artist: 'Aspieduck',
     style: 'boom-bap', tags: ['boom-bap', 'old-school'], bpm: 92,
     bar1OffsetSec: 2.02,
