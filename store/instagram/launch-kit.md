@@ -20,7 +20,11 @@ Sin cuentas · sin anuncios
 - **Link**: https://tarima-tau.vercel.app
 - **Profile photo**: `public/icon-1024.png` (already 1:1, reads well small)
 
-## Launch grid — 9 posts, `post-01.png` … `post-09.png`
+## Launch grid — 9 posts, `v2-post-01.png` … `v2-post-09.png`
+
+(USE THE v2 FILES — `post-0X.png` are the superseded v1 set with tighter
+line spacing and an overclaiming privacy tile. `v2-grid-preview.png` shows
+the full profile.)
 
 Post in REVERSE order (09 first, 01 last) so the grid reads top-left = launch
 announcement when someone visits the profile. All captions avoid tú/vos forms.
@@ -29,7 +33,7 @@ announcement when someone visits the profile. All captions avoid tú/vos forms.
 |---|---|---|
 | 09 | CTA "Subir a la tarima" | El escenario está listo. Tarima ya se puede descargar gratis: link en bio. 🎤 #freestyle #rap #freestylerap |
 | 08 | Cuatro niveles | De rimas simples a vocabulario extremo. Cada sesión sube el listón un poco más. ¿Hasta qué nivel se puede llegar? |
-| 07 | Sin cuentas/anuncios/datos | Sin cuentas. Sin anuncios. Sin recopilar datos personales. Todo el progreso queda guardado en el dispositivo. Así de simple. |
+| 07 | Sin cuentas/anuncios | Sin cuentas. Sin anuncios. Todo el progreso queda guardado en el dispositivo. Así de simple. |
 | 06 | Diccionario de rimas | ¿Bloqueo con una palabra? Buscar y ver toda su familia de rimas, consonantes y asonantes. El diccionario que faltaba para entrenar. |
 | 05 | "Calle" al ritmo | La palabra cae justo en el beat. El pentagrama animado marca cada barra para que el flow nunca se pierda. |
 | 04 | Esquemas de rima | Pareada, cruzada, abrazada, monorrima. Cuatro esquemas para entrenar estructuras distintas. ¿Cuál es la favorita? |
