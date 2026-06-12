@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tarima — logo final (vinilo sobre lima) · 2 colorways</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1b1b1d;display:flex;flex-wrap:wrap;gap:24px;padding:24px;justify-content:center}
+.tile{width:512px;height:512px;border-radius:116px;overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center}
+.lime{background:#c6ff3a}
+.dark{background:radial-gradient(140% 140% at 30% 20%, #16170f 0%, #0a0a0b 55%)}
+.tile .num{position:absolute;top:18px;left:26px;font:700 20px 'JetBrains Mono';z-index:9}
+.lime .num{color:rgba(10,10,11,.4)}.dark .num{color:#555}
+</style>
+</head>
+<body>
+
+<!-- A · FONDO LIMA con texto -->
+<div class="tile lime" id="lA"><span class="num">A</span>
+  <svg width="400" height="400" viewBox="0 0 400 400">
+    <defs><clipPath id="hA"><rect x="0" y="60" width="400" height="208"/></clipPath></defs>
+    <g clip-path="url(#hA)">
+      <circle cx="200" cy="268" r="150" fill="#0a0a0b"/>
+      <circle cx="200" cy="268" r="116" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="5"/>
+      <circle cx="200" cy="268" r="84" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="5"/>
+      <!-- shine: concentric with the disc, between rim and first groove (r=133) -->
+      <path d="M 200 268 m -94.05 -94.05 a 133 133 0 0 1 47.27 -28.62"
+        fill="none" stroke="rgba(236,236,230,.55)" stroke-width="11" stroke-linecap="round"
+        transform="rotate(0 200 268)"/>
+      <circle cx="200" cy="268" r="52" fill="#ececE6"/>
+      <circle cx="200" cy="268" r="8" fill="#0a0a0b"/>
+    </g>
+    <rect x="40" y="268" width="320" height="18" rx="9" fill="#0a0a0b"/>
+    <text x="200" y="345" text-anchor="middle" fill="#0a0a0b" font-family="Anton" font-size="56" letter-spacing="4">TARIMA</text>
+  </svg>
+</div>
+
+<!-- B · FONDO NEGRO con texto -->
+<div class="tile dark" id="lB"><span class="num">B</span>
+  <svg width="400" height="400" viewBox="0 0 400 400">
+    <defs><clipPath id="hB"><rect x="0" y="60" width="400" height="208"/></clipPath></defs>
+    <g clip-path="url(#hB)">
+      <circle cx="200" cy="268" r="150" fill="#1d1d21" stroke="#3c3c44" stroke-width="3"/>
+      <circle cx="200" cy="268" r="116" fill="none" stroke="rgba(236,236,230,.22)" stroke-width="5"/>
+      <circle cx="200" cy="268" r="84" fill="none" stroke="rgba(236,236,230,.22)" stroke-width="5"/>
+      <path d="M 200 268 m -94.05 -94.05 a 133 133 0 0 1 47.27 -28.62"
+        fill="none" stroke="rgba(236,236,230,.5)" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="200" cy="268" r="52" fill="#c6ff3a"/>
+      <circle cx="200" cy="268" r="8" fill="#0a0a0b"/>
+    </g>
+    <rect x="40" y="268" width="320" height="18" rx="9" fill="#c6ff3a"/>
+    <text x="200" y="345" text-anchor="middle" fill="#ececE6" font-family="Anton" font-size="56" letter-spacing="4">TARIMA</text>
+  </svg>
+</div>
+
+<!-- C · FONDO LIMA icono puro (sin texto, disco más grande y centrado) -->
+<div class="tile lime" id="lC"><span class="num">C</span>
+  <svg width="460" height="460" viewBox="0 0 460 460">
+    <defs><clipPath id="hC"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
+    <g clip-path="url(#hC)">
+      <circle cx="230" cy="302" r="186" fill="#0a0a0b"/>
+      <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+      <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+      <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5"
+        fill="none" stroke="rgba(236,236,230,.55)" stroke-width="13" stroke-linecap="round"/>
+      <circle cx="230" cy="302" r="64" fill="#ececE6"/>
+      <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
+    </g>
+    <rect x="38" y="302" width="384" height="22" rx="11" fill="#0a0a0b"/>
+  </svg>
+</div>
+
+<!-- D · FONDO NEGRO icono puro -->
+<div class="tile dark" id="lD"><span class="num">D</span>
+  <svg width="460" height="460" viewBox="0 0 460 460">
+    <defs><clipPath id="hD"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
+    <g clip-path="url(#hD)">
+      <circle cx="230" cy="302" r="186" fill="#1d1d21" stroke="#3c3c44" stroke-width="3"/>
+      <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.22)" stroke-width="6"/>
+      <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.22)" stroke-width="6"/>
+      <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5"
+        fill="none" stroke="rgba(236,236,230,.5)" stroke-width="13" stroke-linecap="round"/>
+      <circle cx="230" cy="302" r="64" fill="#c6ff3a"/>
+      <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
+    </g>
+    <rect x="38" y="302" width="384" height="22" rx="11" fill="#c6ff3a"/>
+  </svg>
+</div>
+
+</body>
+</html>
