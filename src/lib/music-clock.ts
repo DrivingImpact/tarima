@@ -34,6 +34,52 @@ export interface ClockTick {
   playing: boolean;
 }
 
+/**
+ * decodeAudioData with a watchdog. Some Android WebViews have a known bug
+ * where the promise form never settles for certain MP3s; the callback form
+ * still works. Try the promise first; if nothing happens within 8s, retry
+ * via the callback API; if that also stalls (4s), reject so the UI can show
+ * a real error instead of hanging on the countdown forever.
+ */
+function decodeWithFallback(
+  ctx: AudioContext,
+  arr: ArrayBuffer,
+): Promise<AudioBuffer> {
+  const withTimeout = (p: Promise<AudioBuffer>, ms: number) =>
+    new Promise<AudioBuffer>((resolve, reject) => {
+      const t = setTimeout(
+        () => reject(new Error("decode-timeout")),
+        ms,
+      );
+      p.then(
+        (b) => {
+          clearTimeout(t);
+          resolve(b);
+        },
+        (e) => {
+          clearTimeout(t);
+          reject(e);
+        },
+      );
+    });
+
+  const callbackDecode = () =>
+    new Promise<AudioBuffer>((resolve, reject) => {
+      // Decode detaches the buffer, so each attempt needs its own copy.
+      ctx.decodeAudioData(
+        arr.slice(0),
+        (buf) => resolve(buf),
+        (err) => reject(err ?? new Error("decodeAudioData failed")),
+      );
+    });
+
+  return withTimeout(ctx.decodeAudioData(arr.slice(0)), 8000).catch(() =>
+    withTimeout(callbackDecode(), 4000).catch(() => {
+      throw new Error("No se pudo decodificar el audio en este dispositivo");
+    }),
+  );
+}
+
 export class MusicClock {
   private ctx: AudioContext | null = null;
   private buffer: AudioBuffer | null = null;
@@ -87,7 +133,7 @@ export class MusicClock {
     const res = await fetch(src);
     if (!res.ok) throw new Error(`MusicClock: failed to fetch ${src}`);
     const arr = await res.arrayBuffer();
-    this.buffer = await ctx.decodeAudioData(arr);
+    this.buffer = await decodeWithFallback(ctx, arr);
 
     // 1) user-saved offset wins
     const saved =
