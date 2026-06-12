@@ -1,20 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Tarima app icon — "Acid Underground". Graphite stage, acid-lime mark.
-       The T is drawn as geometry (no font dependency) so it rasterises
-       identically everywhere. The lime rule under it reads as the stage
-       (la tarima). -->
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="12%" r="75%">
-      <stop offset="0%" stop-color="#c6ff3a" stop-opacity="0.18"/>
-      <stop offset="60%" stop-color="#c6ff3a" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="#0a0a0b"/>
-  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
-  <rect x="6" y="6" width="500" height="500" rx="106" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="2"/>
-  <g fill="#c6ff3a">
-    <rect x="132" y="150" width="248" height="54" rx="12"/>
-    <rect x="229" y="150" width="54" height="212" rx="12"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460">
+  <rect width="460" height="460" rx="104" fill="#c6ff3a"/>
+  <g clip-path="url(#h)">
+    <defs><clipPath id="h"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
+    <circle cx="230" cy="302" r="186" fill="#0a0a0b"/>
+    <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+    <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+    <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5" fill="none" stroke="rgba(236,236,230,.55)" stroke-width="13" stroke-linecap="round"/>
+    <circle cx="230" cy="302" r="64" fill="#ececE6"/>
+    <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
   </g>
-  <rect x="150" y="392" width="212" height="10" rx="5" fill="#c6ff3a" fill-opacity="0.55"/>
+  <rect x="38" y="302" width="384" height="22" rx="11" fill="#0a0a0b"/>
 </svg>

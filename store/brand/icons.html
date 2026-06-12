@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#333;display:flex;flex-wrap:wrap;gap:20px;padding:20px}
+.board{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<!-- icon-1024: full-bleed lime square, disc only (OS applies its own mask) -->
+<div class="board" id="icon1024" style="width:1024px;height:1024px;background:#c6ff3a">
+  <svg width="1024" height="1024" viewBox="0 0 460 460">
+    <defs><clipPath id="h1"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
+    <g clip-path="url(#h1)">
+      <circle cx="230" cy="302" r="186" fill="#0a0a0b"/>
+      <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+      <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+      <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5"
+        fill="none" stroke="rgba(236,236,230,.55)" stroke-width="13" stroke-linecap="round"/>
+      <circle cx="230" cy="302" r="64" fill="#ececE6"/>
+      <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
+    </g>
+    <rect x="38" y="302" width="384" height="22" rx="11" fill="#0a0a0b"/>
+  </svg>
+</div>
+
+<!-- icon-foreground: mark only, transparent, generous safe margins (adaptive icon) -->
+<div class="board" id="iconfg" style="width:1024px;height:1024px;background:transparent">
+  <svg width="660" height="660" viewBox="0 0 460 460">
+    <defs><clipPath id="h2"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
+    <g clip-path="url(#h2)">
+      <circle cx="230" cy="302" r="186" fill="#0a0a0b"/>
+      <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+      <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+      <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5"
+        fill="none" stroke="rgba(236,236,230,.55)" stroke-width="13" stroke-linecap="round"/>
+      <circle cx="230" cy="302" r="64" fill="#ececE6"/>
+      <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
+    </g>
+    <rect x="38" y="302" width="384" height="22" rx="11" fill="#0a0a0b"/>
+  </svg>
+</div>
+
+<!-- splash 2732: dark, full logo with name -->
+<div class="board" id="splash" style="width:2732px;height:2732px;background:#0a0a0b">
+  <svg width="1100" height="1100" viewBox="0 0 400 400">
+    <defs><clipPath id="h3"><rect x="0" y="60" width="400" height="208"/></clipPath></defs>
+    <g clip-path="url(#h3)">
+      <circle cx="200" cy="268" r="150" fill="#1d1d21" stroke="#3c3c44" stroke-width="3"/>
+      <circle cx="200" cy="268" r="116" fill="none" stroke="rgba(236,236,230,.22)" stroke-width="5"/>
+      <circle cx="200" cy="268" r="84" fill="none" stroke="rgba(236,236,230,.22)" stroke-width="5"/>
+      <path d="M 200 268 m -94.05 -94.05 a 133 133 0 0 1 47.27 -28.62"
+        fill="none" stroke="rgba(236,236,230,.5)" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="200" cy="268" r="52" fill="#c6ff3a"/>
+      <circle cx="200" cy="268" r="8" fill="#0a0a0b"/>
+    </g>
+    <rect x="40" y="268" width="320" height="18" rx="9" fill="#c6ff3a"/>
+    <text x="200" y="345" text-anchor="middle" fill="#ececE6" font-family="Anton" font-size="56" letter-spacing="4">TARIMA</text>
+  </svg>
+</div>
+
+</body>
+</html>

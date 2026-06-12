@@ -1,17 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Maskable / full-bleed variant: mark kept inside the 80% safe zone so
-       Android's adaptive mask (and iOS rounding) never crop the T. -->
-  <defs>
-    <radialGradient id="glowm" cx="50%" cy="20%" r="70%">
-      <stop offset="0%" stop-color="#c6ff3a" stop-opacity="0.14"/>
-      <stop offset="60%" stop-color="#c6ff3a" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" fill="#0a0a0b"/>
-  <rect width="512" height="512" fill="url(#glowm)"/>
-  <g fill="#c6ff3a">
-    <rect x="156" y="176" width="200" height="46" rx="10"/>
-    <rect x="233" y="176" width="46" height="170" rx="10"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460">
+  <rect width="460" height="460" rx="0" fill="#c6ff3a"/>
+  <g clip-path="url(#h)">
+    <defs><clipPath id="h"><rect x="0" y="50" width="460" height="252"/></clipPath></defs>
+    <circle cx="230" cy="302" r="186" fill="#0a0a0b"/>
+    <circle cx="230" cy="302" r="144" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+    <circle cx="230" cy="302" r="104" fill="none" stroke="rgba(236,236,230,.25)" stroke-width="6"/>
+    <path d="M 230 302 m -116.7 -116.7 a 165 165 0 0 1 58.65 -35.5" fill="none" stroke="rgba(236,236,230,.55)" stroke-width="13" stroke-linecap="round"/>
+    <circle cx="230" cy="302" r="64" fill="#ececE6"/>
+    <circle cx="230" cy="302" r="10" fill="#0a0a0b"/>
   </g>
-  <rect x="176" y="372" width="160" height="8" rx="4" fill="#c6ff3a" fill-opacity="0.55"/>
+  <rect x="38" y="302" width="384" height="22" rx="11" fill="#0a0a0b"/>
 </svg>
