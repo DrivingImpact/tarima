@@ -33,8 +33,14 @@ INCLUYE
 • Beats sincronizados con detección de compás (con opción de reajustar el
   ritmo en vivo).
 • Pentagrama animado con cabezal de reproducción para no perder el tiempo.
-• Diccionario de rimas: buscar una palabra y ver familias de rimas
-  consonantes y asonantes.
+• Grabar y escuchar: graba el freestyle y vuelve a escucharlo para mejorar.
+• Reto del día: un desafío nuevo cada día, igual para todas las personas.
+• Retos de improvisación: meter un objeto, una emoción, un lugar, una
+  situación o una temática que aparece en pantalla.
+• Diccionario de rimas: buscar una palabra y ver rimas consonantes,
+  asonantes, cercanas y compuestas, con conteo de sílabas.
+• Estadísticas de entrenamiento: palabras entrenadas, rango de BPM, esquemas
+  y tipos de reto practicados, tiempo total.
 • Progreso, barras totales, rachas y logros, todo guardado en el dispositivo.
 • Cuatro esquemas de rima y cuatro niveles de dificultad.
 
@@ -44,7 +50,8 @@ guarda solo en el dispositivo.
 
 TARIMA PRO
 Todos los beats son gratis para todas las personas. La versión gratuita
-incluye un número de sesiones por día; Tarima Pro ofrece sesiones ilimitadas.
+incluye un número de sesiones por día; Tarima Pro ofrece sesiones ilimitadas
+y modos de entrenamiento avanzados (doble tempo y sangre/4x4).
 
 ---
 
