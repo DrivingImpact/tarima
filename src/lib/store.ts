@@ -182,6 +182,11 @@ interface ProgressSlice extends UserProgress {
 // exactly one place to read from and one place to write to.
 interface EntitlementsSlice {
   isPro: boolean;
+  // Permanent Pro granted by a redeem code (UGC promo). Unlike `isPro`, this
+  // is NEVER downgraded by the RevenueCat sync — once a code is redeemed the
+  // person keeps Pro for good, even after billing goes live. `isPro` is always
+  // kept as `rcPro || promoPro` so the gating layer reads one flag.
+  promoPro: boolean;
   // Resets at local midnight via `rollUsage()`. Persisted as plain JSON.
   dailyUsage: DailyUsage;
 }
@@ -223,6 +228,9 @@ interface AppStore {
    *  once a payment provider is wired (RevenueCat / Stripe), the webhook
    *  hands off to this same setter. */
   setPro: (value: boolean) => void;
+  /** Grant permanent Pro from a redeem code (UGC promo). Sets `promoPro` so the
+   *  grant survives RevenueCat syncs forever. */
+  redeemPro: () => void;
   /** Pure read: would this beat be allowed right now? Doesn't mutate state.
    *  UI calls this before navigating into the game. */
   checkSession: (beat: BeatTrack) => SessionCheck;
@@ -316,6 +324,7 @@ const initialSettings: GameSettings = {
 
 const initialEntitlements: EntitlementsSlice = {
   isPro: false,
+  promoPro: false,
   // `rollUsage(null)` returns today's date with count=0 — safe initial value
   // even if the store is first instantiated server-side (todayLocalStr just
   // reads the build-time / SSR clock; the client will re-roll on hydration).
@@ -611,7 +620,19 @@ export const useAppStore = create<AppStore>()(
 
       setPro: (value: boolean) => {
         set((state) => ({
-          entitlements: { ...state.entitlements, isPro: value },
+          // Never drop below a redeemed promo grant: effective Pro is
+          // rcPro || promoPro. This is what stops the RevenueCat sync from
+          // wiping a code-granted lifetime Pro when RC reports no entitlement.
+          entitlements: {
+            ...state.entitlements,
+            isPro: value || state.entitlements.promoPro,
+          },
+        }));
+      },
+
+      redeemPro: () => {
+        set((state) => ({
+          entitlements: { ...state.entitlements, isPro: true, promoPro: true },
         }));
       },
 

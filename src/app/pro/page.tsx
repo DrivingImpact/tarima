@@ -28,6 +28,7 @@ import {
   restore,
   type ProPackage,
 } from "@/lib/purchases";
+import { redeemAvailable, redeemCode } from "@/lib/redeem";
 
 const STRIPE_YEARLY = process.env.NEXT_PUBLIC_STRIPE_YEARLY_URL ?? "";
 const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_URL ?? "";
@@ -36,11 +37,15 @@ const DEV_TOGGLE_ON = process.env.NEXT_PUBLIC_PRO_DEV_TOGGLE === "1";
 type Plan = "yearly" | "monthly";
 
 export default function ProPage() {
-  const { entitlements, setPro } = useAppStore();
+  const { entitlements, setPro, redeemPro } = useAppStore();
   const isPro = entitlements.isPro;
   const [selectedPlan, setSelectedPlan] = useState<Plan>("yearly");
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Redeem-code state.
+  const [code, setCode] = useState("");
+  const [redeeming, setRedeeming] = useState(false);
+  const canRedeem = redeemAvailable();
   // Native (Capacitor) only: real Play subscriptions from RevenueCat.
   const [pkgs, setPkgs] = useState<ProPackage[]>([]);
   const native = billingAvailable();
@@ -108,6 +113,29 @@ export default function ProPage() {
       flash("No se pudo restaurar. Probar de nuevo.");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleRedeem = async () => {
+    if (!code.trim() || redeeming) return;
+    setRedeeming(true);
+    try {
+      const res = await redeemCode(code);
+      if (res.ok) {
+        redeemPro(); // permanent Pro, survives RevenueCat syncs
+        setCode("");
+        flash("¡Código activado! Ya tienes Tarima Pro. 🎤");
+        return;
+      }
+      const msg: Record<string, string> = {
+        used: "Ese código ya se usó.",
+        invalid: "Código no válido. Revisar e intentar de nuevo.",
+        network: "Sin conexión. Probar de nuevo en un momento.",
+        disabled: "Los códigos no están disponibles ahora.",
+      };
+      flash(msg[res.reason ?? "invalid"] ?? "No se pudo activar el código.");
+    } finally {
+      setRedeeming(false);
     }
   };
 
@@ -250,6 +278,45 @@ export default function ProPage() {
               Política de privacidad
             </Link>
           </p>
+
+          {/* Redeem a Pro code (UGC promo: "manda un video, te damos Pro"). */}
+          {canRedeem && (
+            <div className="mt-8 card-dark rounded-2xl p-5">
+              <p className="text-sm font-bold mb-1">¿Tienes un código?</p>
+              <p className="text-xs text-muted mb-3 leading-relaxed">
+                Manda un video usando Tarima a{" "}
+                <a
+                  href="https://instagram.com/tarimafreestyle"
+                  className="text-accent hover:underline"
+                >
+                  @tarimafreestyle
+                </a>{" "}
+                y te damos Pro gratis.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleRedeem();
+                  }}
+                  placeholder="TAR-XXXX-XXXX"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  aria-label="Código de Pro"
+                  className="flex-1 min-w-0 px-3 py-3 rounded-xl bg-black/30 border border-white/10 text-sm uppercase tracking-wider placeholder:text-muted/40 focus:outline-none focus:border-accent/50"
+                />
+                <button
+                  onClick={handleRedeem}
+                  disabled={redeeming || !code.trim()}
+                  className="px-5 py-3 rounded-xl btn-primary text-sm font-bold disabled:opacity-50 shrink-0"
+                >
+                  {redeeming ? "…" : "Activar"}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Dev-only manual toggle so we can verify Pro paths without a live
               checkout. Hidden in prod unless NEXT_PUBLIC_PRO_DEV_TOGGLE=1. */}
