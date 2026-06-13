@@ -2,6 +2,94 @@ export type GameMode = 'clasico' | 'toque' | 'barras-infinitas' | 'generador';
 export type Difficulty = 'principiante' | 'intermedio' | 'avanzado' | 'experto';
 export type RhymeScheme = 'AABB' | 'ABAB' | 'ABBA' | 'AAAA';
 
+// ── Drills: prompt kind + session modifier ───────────────────────
+// A drill is two orthogonal dimensions layered on top of the existing modes,
+// so GameMode stays stable. `PromptKind` chooses what the changing prompt
+// banner shows (real freestyle "deja": an object, an emotion, a place, a
+// situation, or a theme to weave in); 'palabras' = no banner, classic word
+// flow only. `SessionModifier` reshapes the beat/tempo during the session.
+export type PromptKind =
+  | 'palabras'
+  | 'objeto'
+  | 'emocion'
+  | 'lugar'
+  | 'situacion'
+  | 'tematica';
+
+export interface PromptCard {
+  kind: PromptKind;
+  // The thing to incorporate, e.g. "una llave oxidada", "nostalgia",
+  // "un andén vacío", "perdiste la última batalla".
+  text: string;
+  // Optional second line for flavour / instruction.
+  hint?: string;
+}
+
+// 'ninguno' = steady beat. 'doble-tempo' = words/banner speed ramps up over
+// the session (double-time trainer). 'sangre' = the beat character switches
+// partway (4x4 battle simulation: adapt mid-flow).
+export type SessionModifier = 'ninguno' | 'doble-tempo' | 'sangre';
+
+export const PROMPT_KIND_CONFIG: Record<PromptKind, {
+  label: string;
+  icon: string;
+  description: string;
+}> = {
+  palabras: { label: 'Palabras', icon: '🔤', description: 'Solo palabras al ritmo' },
+  objeto: { label: 'Deja / Objeto', icon: '🎁', description: 'Mete el objeto que aparece' },
+  emocion: { label: 'Emoción', icon: '💔', description: 'Rapea desde la emoción dada' },
+  lugar: { label: 'Lugar', icon: '📍', description: 'Sitúa la rima en ese lugar' },
+  situacion: { label: 'Situación', icon: '🎬', description: 'Improvisa sobre la escena' },
+  tematica: { label: 'Temática', icon: '🧠', description: 'Todo gira en torno al tema' },
+};
+
+export const MODIFIER_CONFIG: Record<SessionModifier, {
+  label: string;
+  icon: string;
+  description: string;
+}> = {
+  ninguno: { label: 'Normal', icon: '▶️', description: 'Ritmo constante' },
+  'doble-tempo': { label: 'Doble Tempo', icon: '⚡', description: 'La velocidad sube poco a poco' },
+  sangre: { label: 'Sangre / 4x4', icon: '🩸', description: 'El beat cambia a mitad' },
+};
+
+// ── Recordings (record & review) ─────────────────────────────────
+export interface RecordingMeta {
+  id: string;
+  createdAt: string; // ISO timestamp
+  durationSec: number;
+  beatId: string | null;
+  beatName: string | null;
+  mode: GameMode;
+  bars: number;
+  // Where the audio blob lives. Web → IndexedDB under `storageKey`; native
+  // (Capacitor) → Filesystem path under `storageKey`. Metadata persists in the
+  // store; the blob is fetched on demand for playback.
+  storage: 'idb' | 'filesystem';
+  storageKey: string;
+  // Optional user-given title.
+  title?: string;
+}
+
+// ── Daily challenge (reto del día) ───────────────────────────────
+export interface DailyChallengeDef {
+  date: string; // YYYY-MM-DD (local)
+  beatId: string;
+  scheme: RhymeScheme;
+  difficulty: Difficulty;
+  promptKind: PromptKind;
+  // Deterministic seed so everyone gets the same words on the same day.
+  seed: number;
+}
+
+export interface DailyState {
+  lastCompletedDate: string | null; // YYYY-MM-DD
+  streak: number;
+  bestBars: number;
+  // Recent results, newest first, capped by the store.
+  history: { date: string; bars: number }[];
+}
+
 // Most rap is 4/4 but lofi/jazz-hop can sit in 6/8 swing, and halftime
 // reframes 4/4 (kick on 1, snare on 3, half the perceived tempo). The UI
 // reads the parsed beatsPerBar to draw the staff.
@@ -87,6 +175,13 @@ export interface GameState {
   barsCompleted: number;
   sessionStartTime: number | null;
   isRecording: boolean;
+  // ── Drill state (set at startGame) ──
+  promptKind: PromptKind;
+  modifier: SessionModifier;
+  // The live prompt banner for non-'palabras' drills; null for 'palabras'.
+  currentPrompt: PromptCard | null;
+  // True while running a reto-del-día session (counts toward the daily streak).
+  isDaily: boolean;
 }
 
 export interface UserProgress {
@@ -98,6 +193,18 @@ export interface UserProgress {
   achievements: Achievement[];
   favoriteMode: GameMode | null;
   favoriteBeat: string | null;
+  // ── Honest training-breadth stats (folded in at endSession) ──
+  // Unique words the trainer has shown this user, capped by the store.
+  // Length = "palabras entrenadas" (vocabulary range trained on).
+  vocabUsed: string[];
+  // Slowest / fastest BPM the user has actually practised at.
+  bpmTrainedMin: number | null;
+  bpmTrainedMax: number | null;
+  // Distinct rhyme schemes and prompt kinds practised.
+  schemesPracticed: RhymeScheme[];
+  promptKindsPracticed: PromptKind[];
+  // Total practice time in seconds.
+  totalSeconds: number;
 }
 
 export interface Achievement {

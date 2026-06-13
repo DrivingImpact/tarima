@@ -10,8 +10,17 @@ import type {
   UserProgress,
   Achievement,
   GameSettings,
+  PromptKind,
+  PromptCard,
+  SessionModifier,
+  RecordingMeta,
+  DailyState,
 } from './types';
 import { DIFFICULTY_CONFIG } from './types';
+
+// Cap the persisted unique-vocab list so storage can't grow unbounded.
+const VOCAB_CAP = 3000;
+const DAILY_HISTORY_CAP = 30;
 import { generateRound, calculateScore } from './game-engine';
 import type { BeatTrack } from './beat-tracks';
 import {
@@ -204,6 +213,12 @@ interface AppStore {
   // ── Entitlements (persisted) ──
   entitlements: EntitlementsSlice;
 
+  // ── Recordings metadata (persisted; blobs live in IDB/filesystem) ──
+  recordings: RecordingMeta[];
+
+  // ── Daily challenge state (persisted) ──
+  daily: DailyState;
+
   // ── Actions ──
   startGame: (
     mode: GameMode,
@@ -211,6 +226,11 @@ interface AppStore {
     scheme: RhymeScheme,
     beat: BeatConfig | null,
     wordPool: Word[],
+    opts?: {
+      promptKind?: PromptKind;
+      modifier?: SessionModifier;
+      isDaily?: boolean;
+    },
   ) => void;
   pauseGame: () => void;
   resumeGame: () => void;
@@ -222,6 +242,19 @@ interface AppStore {
   unlockAchievement: (id: string) => void;
   updateSettings: (partial: Partial<GameSettings>) => void;
   toggleRecording: () => void;
+  /** Set / clear the live prompt banner for object/emotion/theme drills. */
+  setPrompt: (card: PromptCard | null) => void;
+
+  // ── Recordings actions ──
+  /** Add a finished recording's metadata. Newest first. */
+  addRecording: (meta: RecordingMeta) => void;
+  /** Remove a recording's metadata by id. The caller deletes the blob first. */
+  deleteRecording: (id: string) => void;
+
+  // ── Daily challenge actions ──
+  /** Mark today's reto-del-día complete with `bars` bars; updates streak,
+   *  best, and capped history. Idempotent within the same day. */
+  completeDaily: (bars: number) => void;
 
   // ── Entitlements actions ──
   /** Activate / revoke Pro. Today the only caller is the manual /pro flow;
@@ -284,6 +317,10 @@ const initialGame: GameSlice = {
   barsCompleted: 0,
   sessionStartTime: null,
   isRecording: false,
+  promptKind: 'palabras',
+  modifier: 'ninguno',
+  currentPrompt: null,
+  isDaily: false,
   wordPool: [],
   usedWords: new Set(),
 };
@@ -297,6 +334,12 @@ const initialProgress: ProgressSlice = {
   achievements: ACHIEVEMENTS.map((a) => ({ ...a })),
   favoriteMode: null,
   favoriteBeat: null,
+  vocabUsed: [],
+  bpmTrainedMin: null,
+  bpmTrainedMax: null,
+  schemesPracticed: [],
+  promptKindsPracticed: [],
+  totalSeconds: 0,
   modeSessions: {
     clasico: 0,
     toque: 0,
@@ -309,6 +352,13 @@ const initialProgress: ProgressSlice = {
     avanzado: 0,
     experto: 0,
   },
+};
+
+const initialDaily: DailyState = {
+  lastCompletedDate: null,
+  streak: 0,
+  bestBars: 0,
+  history: [],
 };
 
 const initialSettings: GameSettings = {
@@ -340,10 +390,12 @@ export const useAppStore = create<AppStore>()(
       progress: { ...initialProgress },
       settings: { ...initialSettings },
       entitlements: { ...initialEntitlements },
+      recordings: [],
+      daily: { ...initialDaily },
 
       // ── Game actions ──
 
-      startGame: (mode, difficulty, scheme, beat, wordPool) => {
+      startGame: (mode, difficulty, scheme, beat, wordPool, opts) => {
         const config = DIFFICULTY_CONFIG[difficulty];
         const count = config.wordsPerRound;
         const words = generateRound(wordPool, scheme, count);
@@ -357,6 +409,10 @@ export const useAppStore = create<AppStore>()(
             currentBeat: beat,
             currentWords: words,
             sessionStartTime: Date.now(),
+            promptKind: opts?.promptKind ?? 'palabras',
+            modifier: opts?.modifier ?? 'ninguno',
+            isDaily: opts?.isDaily ?? false,
+            currentPrompt: null,
             wordPool,
             usedWords: new Set(words.map((w) => w.text)),
           },
@@ -546,6 +602,34 @@ export const useAppStore = create<AppStore>()(
           }
         }
 
+        // ── Honest training-breadth stats ──
+        // Vocab range: union of words shown this session, capped.
+        const vocabSet = new Set(progress.vocabUsed);
+        for (const w of game.usedWords) vocabSet.add(w);
+        const vocabUsed = Array.from(vocabSet).slice(-VOCAB_CAP);
+        // BPM range actually practised.
+        const bpm = game.currentBeat?.bpm ?? null;
+        const bpmTrainedMin =
+          bpm == null
+            ? progress.bpmTrainedMin
+            : Math.min(progress.bpmTrainedMin ?? bpm, bpm);
+        const bpmTrainedMax =
+          bpm == null
+            ? progress.bpmTrainedMax
+            : Math.max(progress.bpmTrainedMax ?? bpm, bpm);
+        // Distinct schemes + prompt kinds.
+        const schemesPracticed = progress.schemesPracticed.includes(
+          game.rhymeScheme,
+        )
+          ? progress.schemesPracticed
+          : [...progress.schemesPracticed, game.rhymeScheme];
+        const promptKindsPracticed = progress.promptKindsPracticed.includes(
+          game.promptKind,
+        )
+          ? progress.promptKindsPracticed
+          : [...progress.promptKindsPracticed, game.promptKind];
+        const totalSeconds = progress.totalSeconds + Math.round(sessionDurationMs / 1000);
+
         set({
           progress: {
             ...progress,
@@ -559,6 +643,12 @@ export const useAppStore = create<AppStore>()(
             favoriteBeat: game.currentBeat?.id ?? progress.favoriteBeat,
             modeSessions: newModeSessions,
             difficultySessions: newDifficultySessions,
+            vocabUsed,
+            bpmTrainedMin,
+            bpmTrainedMax,
+            schemesPracticed,
+            promptKindsPracticed,
+            totalSeconds,
           },
           game: {
             ...get().game,
@@ -616,6 +706,65 @@ export const useAppStore = create<AppStore>()(
         }));
       },
 
+      setPrompt: (card) => {
+        set((state) => ({
+          game: { ...state.game, currentPrompt: card },
+        }));
+      },
+
+      // ── Recordings ──
+
+      addRecording: (meta) => {
+        set((state) => ({
+          recordings: [meta, ...state.recordings],
+        }));
+      },
+
+      deleteRecording: (id) => {
+        set((state) => ({
+          recordings: state.recordings.filter((r) => r.id !== id),
+        }));
+      },
+
+      // ── Daily challenge ──
+
+      completeDaily: (bars) => {
+        set((state) => {
+          const today = todayStr();
+          const d = state.daily;
+          // Already logged today: only bump bestBars if this run was better.
+          if (d.lastCompletedDate === today) {
+            return {
+              daily: {
+                ...d,
+                bestBars: Math.max(d.bestBars, bars),
+                history: d.history.map((h) =>
+                  h.date === today
+                    ? { date: today, bars: Math.max(h.bars, bars) }
+                    : h,
+                ),
+              },
+            };
+          }
+          // New day: extend the streak if yesterday was the last completion.
+          const gap = d.lastCompletedDate
+            ? daysBetween(d.lastCompletedDate, today)
+            : null;
+          const streak = gap === 1 ? d.streak + 1 : 1;
+          return {
+            daily: {
+              lastCompletedDate: today,
+              streak,
+              bestBars: Math.max(d.bestBars, bars),
+              history: [{ date: today, bars }, ...d.history].slice(
+                0,
+                DAILY_HISTORY_CAP,
+              ),
+            },
+          };
+        });
+      },
+
       // ── Entitlements ──
 
       setPro: (value: boolean) => {
@@ -668,6 +817,8 @@ export const useAppStore = create<AppStore>()(
         },
         settings: state.settings,
         entitlements: state.entitlements,
+        recordings: state.recordings,
+        daily: state.daily,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<AppStore>;
@@ -685,6 +836,8 @@ export const useAppStore = create<AppStore>()(
             ...current.settings,
             ...p.settings,
           },
+          recordings: p.recordings ?? current.recordings,
+          daily: { ...current.daily, ...p.daily },
           entitlements: {
             ...current.entitlements,
             ...p.entitlements,
