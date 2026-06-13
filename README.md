@@ -33,7 +33,7 @@ Copy `.env.example` to `.env.local` for the optional remote beat pipeline and Re
 
 ### Beats
 
-Audio tracks are licensed from [Pixabay](https://pixabay.com/music/) under the Pixabay Content License, which does not permit redistribution as standalone files. They are therefore **not in this repository**: builds bundle them from a local `public/beats-v2/` folder (git-ignored), and full artist credits are in the app at `/creditos`.
+Audio tracks are licensed for in-app playback only and may not be redistributed as standalone files. They are therefore **not in this repository**: builds bundle them from a local `public/beats-v2/` folder (git-ignored). Source/licensing provenance is kept privately, out of tree.
 
 ## License
 

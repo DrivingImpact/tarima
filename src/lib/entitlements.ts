@@ -43,9 +43,9 @@ export function todayLocalStr(): string {
 export function isBeatLocked(beat: BeatTrack, isPro: boolean): boolean {
   // Monetization model (2026-06): ALL beats are free for everyone. Pro sells
   // unlimited daily sessions — never the music — so the app never charges for
-  // access to a Pixabay track (keeps us clear of the "selling music files"
-  // line in the Pixabay Content License). No beat is ever locked. Params kept
-  // for call-site stability if gating ever returns.
+  // access to any track (keeps us clear of any "selling music files" license
+  // restriction). No beat is ever locked. Params kept for call-site stability
+  // if gating ever returns.
   void beat;
   void isPro;
   return false;

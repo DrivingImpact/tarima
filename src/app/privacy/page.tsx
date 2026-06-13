@@ -64,8 +64,8 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="Música">
-          Los beats incluidos provienen de Pixabay bajo la Licencia de
-          Contenido de Pixabay y se reproducen localmente desde la aplicación.
+          La música incluida está debidamente licenciada y se reproduce de forma
+          local desde la aplicación, sin recopilar datos.
         </Section>
 
         <Section title="Menores de edad">

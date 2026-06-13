@@ -68,12 +68,10 @@ export default function TermsPage() {
         </Section>
 
         <Section title="Música y propiedad intelectual">
-          Los beats provienen de Pixabay y se usan bajo la Licencia de Contenido
-          de Pixabay (ver{" "}
-          <Link href="/creditos" className="text-accent">
-            Créditos
-          </Link>
-          ). La marca, el diseño y el código de Tarima pertenecen a sus autores.
+          La música incluida en la aplicación se usa con la licencia
+          correspondiente para su reproducción dentro de la app y no se
+          distribuye por separado. La marca, el diseño y el código de Tarima
+          pertenecen a sus autores.
         </Section>
 
         <Section title="Sin garantías">

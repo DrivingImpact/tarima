@@ -195,7 +195,7 @@ export default function Home() {
         </button>
 
         {/* Web-only footer: the APK link makes no sense inside the app
-            itself, and native nav already exposes créditos/legal. */}
+            itself, and native nav already exposes legal links. */}
         {mounted && !isNative() && (
           <div className="mt-8 text-center space-y-3">
             <a
@@ -211,10 +211,6 @@ export default function Home() {
               >
                 Instagram
               </a>
-              <span aria-hidden>·</span>
-              <Link href="/creditos" className="hover:text-accent transition-colors">
-                Créditos
-              </Link>
               <span aria-hidden>·</span>
               <Link href="/privacy" className="hover:text-accent transition-colors">
                 Privacidad
@@ -314,7 +310,7 @@ export default function Home() {
                       )}
                     </p>
                     <p className="text-xs text-muted truncate">
-                      {beat.artist} · {beat.style.replace("-", " ")} · {beat.bpm} BPM ·{" "}
+                      {beat.style.replace("-", " ")} · {beat.bpm} BPM ·{" "}
                       {beat.timeSignature ?? "4/4"}
                       {beat.feel ? ` · ${beat.feel}` : ""}
                     </p>

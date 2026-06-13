@@ -3,7 +3,10 @@ import type { BeatStyle, TimeSignature } from './types';
 export interface BeatTrack {
   id: string;
   name: string;
-  artist: string;
+  // Optional, never rendered. Populated only by the remote-sheet loader for
+  // the production catalogue; the bundled fallback below leaves it unset.
+  // Source attribution / licensing is tracked privately, out of tree.
+  artist?: string;
   style: BeatStyle;
   tags: string[];
   // Authoritative BPM — drives the master clock. No runtime detection;
@@ -19,9 +22,12 @@ export interface BeatTrack {
   // the first onset on load.
   bar1OffsetSec?: number;
   src: string;
-  license: string;
-  licenseUrl: string;
-  source: string;
+  // Licensing/source metadata — optional, populated only by the remote-sheet
+  // loader, never rendered. Bundled tracks omit it; provenance is kept
+  // out of tree.
+  license?: string;
+  licenseUrl?: string;
+  source?: string;
   timeSignature?: TimeSignature; // defaults to '4/4'
   feel?: string;
   // True if this beat is gated behind Pro. Undefined / false = free.
@@ -30,13 +36,10 @@ export interface BeatTrack {
   pro?: boolean;
 }
 
-// All 11 tracks below are sourced from Pixabay under the Pixabay Content
-// License — commercial use allowed, no attribution required, no need to
-// redistribute the audio standalone. We bake artist + source URL anyway so
-// the credits screen is honest. When the live Google-Sheet catalogue lands,
-// these stay as the offline fallback.
-//
-// Source URL pattern: `https://pixabay.com/music/<original-slug>-<id>/`.
+// Bundled offline fallback catalogue — shipped inside the app binary and served
+// whenever the live Google-Sheet catalogue is unreachable, so the app can never
+// be left with zero beats. Display names are Tarima's own; per-track source and
+// licensing are recorded privately, out of tree (not in the app or the repo).
 // All beats are FREE for everyone (see isBeatLocked). The `pro` field on the
 // type is kept for the remote-catalogue schema, but no bundled beat sets it —
 // Pro sells unlimited sessions, not access to music.
@@ -44,94 +47,64 @@ export const BEAT_TRACKS: BeatTrack[] = [
   // Boom-bap (slow→mid), old-school west-coast, and a jazz-hop / soul flavour
   // so the breadth is obvious from the first listen.
   {
-    id: 'darren-hirst-minimal-90s', name: 'Minimal 90s', artist: 'Darren Hirst',
+    id: 'darren-hirst-minimal-90s', name: 'Sótano',
     style: 'boom-bap', tags: ['boom-bap', '90s', 'minimal'], bpm: 81,
     src: '/beats-v2/darren-hirst-minimal-90s.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-minimal-90s-rap-beat-312554/',
   },
   {
-    id: 'aspieduck-1-weirdo', name: '1 Weirdo', artist: 'Aspieduck',
+    id: 'aspieduck-1-weirdo', name: 'Raro',
     style: 'boom-bap', tags: ['boom-bap', 'old-school'], bpm: 92,
     bar1OffsetSec: 2.02,
     src: '/beats-v2/aspieduck-1-weirdo.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-old-school-hip-hop-boom-bap-1-weirdo-176238/',
   },
   {
-    id: 'alexgrohl-sad-soul', name: 'Sad Soul', artist: 'AlexGrohl',
+    id: 'alexgrohl-sad-soul', name: 'Humo',
     style: 'jazz-hop', tags: ['jazz-hop', 'soul', 'mellow'], bpm: 92,
     bar1OffsetSec: 14.63,
     src: '/beats-v2/alexgrohl-sad-soul.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-sad-soul-hip-hop-185750/',
   },
   {
-    id: 'doublehmajor-westcoast-90s', name: 'Westcoast 90s', artist: 'DoubleHMajor',
+    id: 'doublehmajor-westcoast-90s', name: 'Costa',
     style: 'old-school', tags: ['old-school', 'west-coast', 'g-funk'], bpm: 99,
     src: '/beats-v2/doublehmajor-westcoast-90s.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-westcoast90stypebeat-508774/',
   },
 
   {
-    id: 'pasabaa-anantha-pernel', name: 'Anantha Pernel', artist: 'Pasabaa',
+    id: 'pasabaa-anantha-pernel', name: 'Pulso',
     style: 'boom-bap', tags: ['boom-bap', 'modern'], bpm: 89,
     src: '/beats-v2/pasabaa-anantha-pernel.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-rap-type-beat-anantha-pernel-instrumental-2025-416239/',
   },
   {
-    id: 'delosound-old-school', name: 'Old School', artist: 'Delosound',
+    id: 'delosound-old-school', name: 'Cinta',
     style: 'boom-bap', tags: ['boom-bap', 'old-school'], bpm: 86,
     // librosa returned 172.3 → halved (boom-bap convention; 172 is the
     // double-time hi-hat read, not the bar pulse).
     src: '/beats-v2/delosound-old-school.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-hiphop-beat-old-school-boom-bap-421074/',
   },
   {
-    id: 'sound4stock-urban', name: 'Urban', artist: 'Sound4Stock',
+    id: 'sound4stock-urban', name: 'Asfalto',
     style: 'boom-bap', tags: ['boom-bap', 'urban'], bpm: 89,
     src: '/beats-v2/sound4stock-urban.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-urban-hip-hop-rap-beat-464285/',
   },
   {
-    id: 'vxyage-territory', name: 'Territory', artist: 'Vxyage',
+    id: 'vxyage-territory', name: 'Sombra',
     style: 'boom-bap', tags: ['boom-bap', 'dark', 'horrorcore'], bpm: 99,
     src: '/beats-v2/vxyage-territory.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-old-style-horrorcore-rap-territory-424309/',
   },
   {
-    id: 'yellowbirdbeats-back-right', name: 'Back Right', artist: 'YellowBirdBeats',
+    id: 'yellowbirdbeats-back-right', name: 'Batalla',
     style: 'boom-bap', tags: ['boom-bap', 'battle', 'freestyle'], bpm: 86,
     bar1OffsetSec: 1.51,
     // librosa returned 172.3 → halved; battle/freestyle context confirms
     // the slower bar pulse.
     src: '/beats-v2/yellowbirdbeats-back-right.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-old-school-x-rap-x-hip-hop-beat-battle-x-freestyle-back-right-494512/',
   },
   {
-    id: 'jake-plah-freestyle', name: 'Freestyle', artist: 'Jake Plah',
+    id: 'jake-plah-freestyle', name: 'Lento',
     style: 'boom-bap', tags: ['boom-bap', 'freestyle', 'slow'], bpm: 76,
     // librosa returned 152 → halved. 76 fits the slow-warmup freestyle
     // pocket; if it's actually 152 trap, flip back and update the style.
     src: '/beats-v2/jake-plah-freestyle.mp3',
-    license: 'Pixabay Content License',
-    licenseUrl: 'https://pixabay.com/service/license-summary/',
-    source: 'https://pixabay.com/music/beats-rap-freestyle-beat-435114/',
   },
 ];
 

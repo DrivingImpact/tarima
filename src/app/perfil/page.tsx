@@ -155,12 +155,8 @@ export default function PerfilPage() {
         </div>
       )}
 
-      {/* Footer — legal + credits */}
+      {/* Footer — legal */}
       <div className="mt-auto pt-10 flex items-center justify-center gap-4 text-[10px] uppercase tracking-wider text-muted/70">
-        <Link href="/creditos" className="hover:text-accent transition-colors">
-          Créditos
-        </Link>
-        <span className="text-muted/30">·</span>
         <Link href="/privacy" className="hover:text-accent transition-colors">
           Privacidad
         </Link>

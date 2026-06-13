@@ -104,7 +104,7 @@ function parseRow(headers: string[], row: string[]): BeatTrack | null {
     style,
     tags: [style, ...(get("feel") ? [get("feel")] : [])],
     src: mp3,
-    license: get("license") || "Pixabay",
+    license: get("license") || "Licensed",
     licenseUrl: "",
     source: get("source_url"),
     feel: get("feel") || undefined,

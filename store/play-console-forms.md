@@ -48,7 +48,7 @@ Answer every question **No / None**:
 
 Expected result: **PEGI 3 / ESRB Everyone / "Rated for 3+"**.
 
-Note on music: bundled Pixabay beats are instrumental, no lyrics, no explicit
+Note on music: the bundled beats are instrumental, no lyrics, no explicit
 content — nothing to declare.
 
 ## 4. Target audience and content

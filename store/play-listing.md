@@ -46,8 +46,6 @@ TARIMA PRO
 Todos los beats son gratis para todas las personas. La versión gratuita
 incluye un número de sesiones por día; Tarima Pro ofrece sesiones ilimitadas.
 
-Música de Pixabay bajo la Licencia de Contenido de Pixabay.
-
 ---
 
 ## Graphics checklist

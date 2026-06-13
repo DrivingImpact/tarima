@@ -53,7 +53,7 @@ cd android && JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./gradlew bundleRelease
 
 - Screenshots must not show alternative-store/sideload links (the home
   screenshot here was taken with the web-only APK footer removed).
-- The bundled Pixabay beats are inside the binary, which is the
-  license-compliant distribution route; never attach raw MP3s to the listing.
+- The bundled beats live inside the binary, which is the license-compliant
+  distribution route; never attach raw MP3s to the listing.
 - If Play flags the `REQUEST_INSTALL_PACKAGES`/unknown permissions, check
   `android/app/src/main/AndroidManifest.xml` — Capacitor defaults are clean.
