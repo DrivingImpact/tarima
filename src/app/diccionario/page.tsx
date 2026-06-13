@@ -3,7 +3,12 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { WORD_BANK, getRhymeGroups } from "@/lib/words";
-import { findRhymes } from "@/lib/rhyme-engine";
+import {
+  findRhymes,
+  countSyllables,
+  nearRhymes,
+  compoundRhymes,
+} from "@/lib/rhyme-engine";
 
 export default function DiccionarioPage() {
   const [search, setSearch] = useState("");
@@ -13,10 +18,31 @@ export default function DiccionarioPage() {
 
   const rhymeGroups = useMemo(() => getRhymeGroups(WORD_BANK), []);
 
+  const query = search.trim();
+
   const searchResults = useMemo(() => {
-    if (!search.trim()) return null;
-    return findRhymes(search.trim().toLowerCase(), WORD_BANK, rhymeType);
-  }, [search, rhymeType]);
+    if (!query) return null;
+    return findRhymes(query.toLowerCase(), WORD_BANK, rhymeType);
+  }, [query, rhymeType]);
+
+  // Syllable count of the searched word (works for words outside the bank too).
+  const querySyllables = useMemo(
+    () => (query ? countSyllables(query) : 0),
+    [query]
+  );
+
+  // Asonante-only "near rhymes" — shown as an extra layer when looking at the
+  // perfect (consonante) results, so the imperfect options are still surfaced.
+  const near = useMemo(() => {
+    if (!query || rhymeType !== "consonante") return [];
+    return nearRhymes(query.toLowerCase(), WORD_BANK, "asonante").slice(0, 24);
+  }, [query, rhymeType]);
+
+  // Multi-word combinations whose joined ending rhymes with the word.
+  const compounds = useMemo(() => {
+    if (!query) return [];
+    return compoundRhymes(query.toLowerCase(), WORD_BANK, 10);
+  }, [query]);
 
   const topGroups = useMemo(() => {
     const entries = Array.from(rhymeGroups.entries());
@@ -87,13 +113,19 @@ export default function DiccionarioPage() {
       </div>
 
       {searchResults !== null ? (
-        <div className="animate-fade-in">
-          <p className="text-sm text-muted mb-3">
-            <span className="text-accent font-bold">
-              {searchResults.length}
-            </span>{" "}
-            rimas para &quot;{search.trim()}&quot;
-          </p>
+        <div className="animate-fade-in space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted">
+              <span className="text-accent font-bold">
+                {searchResults.length}
+              </span>{" "}
+              rimas para &quot;{query}&quot;
+            </p>
+            <span className="shrink-0 px-2 py-1 rounded-lg bg-white/5 text-[10px] font-bold uppercase tracking-wider text-muted">
+              {querySyllables} {querySyllables === 1 ? "sílaba" : "sílabas"}
+            </span>
+          </div>
+
           {searchResults.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {searchResults.map((word) => (
@@ -104,7 +136,7 @@ export default function DiccionarioPage() {
                 >
                   {word.text}
                   <span className="text-[10px] text-muted ml-1">
-                    {word.syllables}sil
+                    {word.syllables} síl
                   </span>
                 </button>
               ))}
@@ -113,6 +145,55 @@ export default function DiccionarioPage() {
             <p className="text-muted text-center py-8">
               Sin rimas. Probar con otra palabra.
             </p>
+          )}
+
+          {near.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted mb-1">
+                Rimas cercanas
+              </p>
+              <p className="text-[10px] text-muted mb-3">
+                Asonante: coinciden las vocales, no las consonantes.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {near.map((text) => (
+                  <button
+                    key={text}
+                    onClick={() => setSearch(text)}
+                    className="px-3 py-1.5 rounded-xl bg-white/5 text-sm font-medium text-muted hover:text-accent hover:bg-accent/10 transition-all"
+                  >
+                    {text}
+                    <span className="text-[10px] text-muted ml-1">
+                      {countSyllables(text)} síl
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {compounds.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted mb-1">
+                Rimas compuestas
+              </p>
+              <p className="text-[10px] text-muted mb-3">
+                Varias palabras cuyo final rima con la palabra buscada.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {compounds.map((phrase) => (
+                  <span
+                    key={phrase}
+                    className="px-3 py-1.5 rounded-xl card-dark text-sm font-medium text-foreground"
+                  >
+                    {phrase}
+                    <span className="text-[10px] text-muted ml-1">
+                      {countSyllables(phrase.replace(/\s+/g, ""))} síl
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       ) : (

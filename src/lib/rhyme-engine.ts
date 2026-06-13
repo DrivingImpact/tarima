@@ -546,6 +546,154 @@ export function rhymeKey(word: string, depth: number): string {
   return normalizePhonetic(slice);
 }
 
+// ─── Tier-2 depth: syllable counts, consonante/asonante, near + compound ───
+// New public surface. Nothing below changes the existing exports above; these
+// only add capability used by the diccionario page.
+
+/**
+ * Count the syllables of a Spanish word with a solid heuristic
+ * (diphthongs collapse, hiatus splits, accented weak vowels break).
+ * Reuses `syllabify`, so it stays consistent with the rhyme keys.
+ *
+ *   countSyllables('corazón') === 3
+ *   countSyllables('día')     === 2   // í-a hiatus
+ *   countSyllables('fuego')   === 2   // ue diphthong
+ */
+export function countSyllables(word: string): number {
+  const n = syllabify(word).length;
+  return n > 0 ? n : 1;
+}
+
+/**
+ * The "stressed-vowel tail" of a word: everything from the last stressed
+ * vowel to the end, accents stripped. This is the segment a rhyme is judged
+ * on. Exposed as a named helper (alias of `extractRhymeEnding`).
+ *
+ *   stressedTail('canción') === 'on'
+ *   stressedTail('camino')  === 'ino'
+ */
+export function stressedTail(word: string): string {
+  return extractRhymeEnding(word);
+}
+
+/**
+ * Rima consonante: identical from the last stressed vowel, consonants
+ * included (phonetically normalised, so b/v, c/s, ll/y, etc. count as equal).
+ */
+export function consonantRhyme(a: string, b: string): boolean {
+  return isConsonantRhyme(a.toLowerCase().trim(), b.toLowerCase().trim());
+}
+
+/**
+ * Rima asonante: only the vowels from the last stressed vowel match. Every
+ * consonante rhyme is also asonante; use `nearRhymes` for the asonante-only set.
+ */
+export function asonantRhyme(a: string, b: string): boolean {
+  return isAssonantRhyme(a.toLowerCase().trim(), b.toLowerCase().trim());
+}
+
+type WordOrText = string | Word;
+
+function asText(x: WordOrText): string {
+  return typeof x === 'string' ? x : x.text;
+}
+
+/**
+ * The "near rhymes" of a word among a candidate list.
+ *
+ * - type 'asonante' (default): words that rhyme asonante but NOT consonante —
+ *   i.e. the imperfect / vowel-only rhymes a freestyler can reach for.
+ * - type 'consonante': words that rhyme consonante (the perfect ones).
+ *
+ * Accepts plain strings or Word objects; always returns the matching words'
+ * text.
+ */
+export function nearRhymes(
+  word: string,
+  candidates: WordOrText[],
+  type: 'asonante' | 'consonante' = 'asonante'
+): string[] {
+  const w = word.toLowerCase().trim();
+  if (!w) return [];
+
+  const out: string[] = [];
+  for (const c of candidates) {
+    const text = asText(c);
+    const t = text.toLowerCase().trim();
+    if (t === w) continue;
+
+    if (type === 'consonante') {
+      if (isConsonantRhyme(w, t)) out.push(text);
+    } else if (isAssonantRhyme(w, t) && !isConsonantRhyme(w, t)) {
+      out.push(text);
+    }
+  }
+  return out;
+}
+
+// Dialect-neutral function words used as the lead of a compound rhyme. Kept
+// to short, register-agnostic connectors so the generated phrases read
+// naturally across Spanish variants (no possessive "tu", no tú/vos forms).
+const COMPOUND_LEAD_WORDS = [
+  'sin', 'con', 'por', 'más', 'ya', 'mi', 'le', 'lo', 'que', 'no', 'tan', 'su',
+];
+
+/**
+ * Rimas compuestas: multi-word combos whose joined ending rhymes with `word`.
+ *
+ * v1 is intentionally simple. It pairs a short, dialect-neutral lead word
+ * (sin / con / por / más / ...) with a single dictionary word that rhymes
+ * consonante with the target, producing two-word endings such as
+ * "sin razón", "con pasión", "por millón" for "corazón". Richer single-word
+ * rhymes are preferred first (deeper shared tail ranks higher).
+ *
+ * LIMITATION: it does not phonetically re-segment the target across an
+ * arbitrary boundary (e.g. splitting "corazón" into "cora" + "zón"); the
+ * rhyme is always carried by the final dictionary word, with the lead word
+ * supplying the multi-word feel. Results are capped.
+ */
+export function compoundRhymes(
+  word: string,
+  dictionary: WordOrText[],
+  cap = 10
+): string[] {
+  const w = word.toLowerCase().trim();
+  if (!w) return [];
+
+  const targetEnding = normalizeEnding(extractRhymeEnding(w));
+  if (!targetEnding) return [];
+
+  // Single-word consonante rhymes, richest (deepest shared tail) first.
+  const rhymes = dictionary
+    .map(asText)
+    .filter((t) => {
+      const tl = t.toLowerCase().trim();
+      return tl !== w && isConsonantRhyme(w, tl);
+    })
+    .sort((a, b) => getRhymeScore(w, b) - getRhymeScore(w, a));
+
+  const out: string[] = [];
+  const seen = new Set<string>();
+  let leadIdx = 0;
+
+  for (const r of rhymes) {
+    const lead = COMPOUND_LEAD_WORDS[leadIdx % COMPOUND_LEAD_WORDS.length];
+    leadIdx++;
+
+    // Confirm the concatenated tail still rhymes with the target.
+    const joinedEnding = normalizeEnding(extractRhymeEnding(lead + r));
+    if (joinedEnding !== targetEnding) continue;
+
+    const phrase = `${lead} ${r}`;
+    if (seen.has(phrase)) continue;
+    seen.add(phrase);
+    out.push(phrase);
+    if (out.length >= cap) break;
+  }
+
+  return out;
+}
+
 /**
  * Get N random words from the word bank that match a given rhyme ending.
  */

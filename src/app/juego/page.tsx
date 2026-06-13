@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
-import { DIFFICULTY_CONFIG, beatsPerBarFor } from "@/lib/types";
+import { DIFFICULTY_CONFIG, beatsPerBarFor, PROMPT_KIND_CONFIG } from "@/lib/types";
 import type { Word } from "@/lib/types";
+import { getPrompt } from "@/lib/prompts";
+import RecorderButton from "@/components/RecorderButton";
 import { MusicClock } from "@/lib/music-clock";
 import {
   VinylViz,
@@ -88,6 +90,24 @@ export default function JuegoPage() {
   const [showSummary, setShowSummary] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [bufferReady, setBufferReady] = useState(false);
+
+  // ─── Drill / modifier / daily layers (added on top of the core loop) ───
+  // None of the state below touches the MusicClock, beat scheduling, or the
+  // RAF word-advance core logic. They only observe `game.barsCompleted`
+  // (which the existing loop already increments) and add presentation /
+  // pacing nudges around it.
+
+  // Prompt banner: tracks the last 4-bar milestone we refreshed the deja on,
+  // so a new card appears roughly every 4 completed bars.
+  const promptMilestoneRef = useRef<number>(-1);
+  // doble-tempo: tracks the last bar milestone at which we nudged the word
+  // pace forward (a conservative double-time trainer — see effect below).
+  const dobleTempoMilestoneRef = useRef<number>(-1);
+  // sangre: one-time mid-session flash overlay.
+  const [showSangre, setShowSangre] = useState(false);
+  const sangreShownRef = useRef(false);
+  // daily: guard so completeDaily() fires exactly once per session.
+  const dailyCountedRef = useRef(false);
 
   const diffConfig = DIFFICULTY_CONFIG[game.difficulty];
   const isAuto = game.mode === "clasico" || game.mode === "barras-infinitas";
@@ -274,11 +294,27 @@ export default function JuegoPage() {
     clockRef.current?.stop();
   }, [stopRAF]);
 
+  // ─── Daily-challenge completion ───────────────────────────────────
+  // Log the reto-del-día exactly once, capturing bars BEFORE any reset.
+  // Called from the stop/finish path and as an unmount safety net (for a
+  // back-navigation that skips handleStop). The ref guards against double
+  // counting across both paths.
+  const maybeCompleteDaily = useCallback(() => {
+    const s = useAppStore.getState();
+    if (!s.game.isDaily) return;
+    if (dailyCountedRef.current) return;
+    dailyCountedRef.current = true;
+    s.completeDaily(s.game.barsCompleted);
+  }, []);
+
   const handleStop = useCallback(() => {
     stopAudio();
+    // Capture daily bars BEFORE endSession runs (added on top of the existing
+    // finish path; does not alter clock/loop behaviour).
+    maybeCompleteDaily();
     endSession();
     setShowSummary(true);
-  }, [endSession, stopAudio]);
+  }, [endSession, stopAudio, maybeCompleteDaily]);
 
   // Pause/resume drives the MusicClock — same clock means same sync.
   useEffect(() => {
@@ -300,6 +336,17 @@ export default function JuegoPage() {
       stopRAF();
       clockRef.current?.stop();
       clockRef.current = null;
+      // Daily safety net: a back-navigation that unmounts the screen without
+      // going through handleStop still logs the reto-del-día. The ref guard
+      // prevents double counting when handleStop already ran. State is read
+      // at unmount (intact unless handleStop reset it). Inlined rather than
+      // calling maybeCompleteDaily to avoid a TDZ reference (it's declared
+      // later in the component body).
+      const s = useAppStore.getState();
+      if (s.game.isDaily && !dailyCountedRef.current) {
+        dailyCountedRef.current = true;
+        s.completeDaily(s.game.barsCompleted);
+      }
     };
   }, [stopRAF]);
 
@@ -361,6 +408,77 @@ export default function JuegoPage() {
       router.push("/");
     }
   }, [game.isPlaying, showCountdown, showSummary, router]);
+
+  // ─── Prompt banner lifecycle (drills) ─────────────────────────────
+  // For any non-'palabras' kind: set an initial deja on entry, then refresh
+  // it every 4 completed bars. Driven off `game.barsCompleted` (which the
+  // existing loop increments) so it never touches the clock. Paused sessions
+  // don't advance bars, so no refresh happens while paused.
+  useEffect(() => {
+    if (showCountdown || showSummary) return;
+    if (game.promptKind === "palabras") {
+      // 'palabras' never shows the banner — keep the prompt cleared.
+      if (game.currentPrompt) useAppStore.getState().setPrompt(null);
+      return;
+    }
+    if (game.isPaused) return;
+    const milestone = Math.floor(game.barsCompleted / 4);
+    if (game.currentPrompt == null || milestone > promptMilestoneRef.current) {
+      promptMilestoneRef.current = milestone;
+      useAppStore
+        .getState()
+        .setPrompt(getPrompt(game.promptKind, game.difficulty));
+    }
+  }, [
+    game.promptKind,
+    game.difficulty,
+    game.barsCompleted,
+    game.isPaused,
+    game.currentPrompt,
+    showCountdown,
+    showSummary,
+  ]);
+
+  // ─── Modifier: doble-tempo (double-time trainer) ──────────────────
+  // The auto loop advances exactly one word per bar, locked to the clock, so
+  // there is no settings-derived interval to scale. To avoid re-timing the
+  // clock or the RAF word-advance core logic, we apply a conservative
+  // step-up: every 8 completed bars we nudge the word pointer one extra step
+  // (words progressively run ahead of the bar = a double-time feel that
+  // intensifies). Bars/score stay bar-accurate. A full continuous interval
+  // ramp would need on-device tuning against the clock, so it is deliberately
+  // left out here.
+  useEffect(() => {
+    if (showCountdown || showSummary) return;
+    if (game.modifier !== "doble-tempo") return;
+    if (game.isPaused) return;
+    if (game.barsCompleted < 8) return;
+    const milestone = Math.floor(game.barsCompleted / 8);
+    if (milestone > dobleTempoMilestoneRef.current) {
+      dobleTempoMilestoneRef.current = milestone;
+      useAppStore.getState().advanceWord();
+    }
+  }, [
+    game.modifier,
+    game.barsCompleted,
+    game.isPaused,
+    showCountdown,
+    showSummary,
+  ]);
+
+  // ─── Modifier: sangre (4x4 — change the flow mid-session) ──────────
+  // One-time flash overlay at the midpoint (first time bars reach 16). The
+  // audio track is intentionally NOT swapped. Auto-dismisses after ~2s.
+  useEffect(() => {
+    if (showCountdown || showSummary) return;
+    if (game.modifier !== "sangre") return;
+    if (sangreShownRef.current) return;
+    if (game.barsCompleted < 16) return;
+    sangreShownRef.current = true;
+    setShowSangre(true);
+    const t = setTimeout(() => setShowSangre(false), 2000);
+    return () => clearTimeout(t);
+  }, [game.modifier, game.barsCompleted, showCountdown, showSummary]);
 
   // `elapsed` is interval-ticked state (see the effect above) — no Date.now()
   // during render.
@@ -492,7 +610,7 @@ export default function JuegoPage() {
 
   return (
     <div
-      className="app-screen flex flex-col bg-background"
+      className="app-screen flex flex-col bg-background relative"
       onClick={isTap ? handleTap : undefined}
     >
       {/* Header */}
@@ -524,6 +642,11 @@ export default function JuegoPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Self-contained mic toggle. Wrapped so a tap doesn't also fire the
+              tap-mode beat handler bubbling up from the screen container. */}
+          <span onClick={(e) => e.stopPropagation()} className="flex items-center">
+            <RecorderButton />
+          </span>
           {bufferReady && (
             <LongPressButton
               onTap={handleRestart}
@@ -576,6 +699,30 @@ export default function JuegoPage() {
           </p>
         </div>
       </div>
+
+      {/* Prompt banner (drills) — the deja to weave in. Hidden for 'palabras'. */}
+      {game.promptKind !== "palabras" && game.currentPrompt?.text && (
+        <div className="px-4 pb-1">
+          <div className="card-dark rounded-xl px-4 py-2 max-w-3xl mx-auto flex items-center gap-3">
+            <span className="text-xl shrink-0" aria-hidden>
+              {PROMPT_KIND_CONFIG[game.promptKind].icon}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted">
+                {PROMPT_KIND_CONFIG[game.promptKind].label}
+              </p>
+              <p className="text-sm font-bold text-accent truncate">
+                {game.currentPrompt.text}
+              </p>
+              {game.currentPrompt.hint && (
+                <p className="text-[10px] text-muted truncate">
+                  {game.currentPrompt.hint}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Transport — skip the song forward/back, scrubbable progress */}
       <Transport
@@ -646,6 +793,21 @@ export default function JuegoPage() {
           </button>
         )}
       </div>
+
+      {/* Modifier: sangre — one-time mid-session flash. Audio is untouched. */}
+      {showSangre && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none animate-slide-up">
+          <div className="absolute inset-0 bg-danger/20" />
+          <div className="relative text-center px-6">
+            <p className="text-5xl font-display uppercase text-danger drop-shadow">
+              🩸 SANGRE
+            </p>
+            <p className="text-sm uppercase tracking-[0.25em] text-foreground mt-2">
+              cambia el flow
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

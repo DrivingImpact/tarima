@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Difficulty,
   RhymeScheme,
+  PromptKind,
+  SessionModifier,
+  PROMPT_KIND_CONFIG,
+  MODIFIER_CONFIG,
 } from "@/lib/types";
 import { useBeatTracks } from "@/lib/use-beat-tracks";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -14,8 +18,10 @@ import { getWordsByDifficulty } from "@/lib/words";
 import { FREE_DAILY_SESSIONS, isBeatLocked } from "@/lib/entitlements";
 import { isNative } from "@/lib/purchases";
 import { Paywall } from "@/components/Paywall";
+import { getTodayChallenge, isDailyDoneToday } from "@/lib/daily";
+import DailyCard from "@/components/DailyCard";
 
-type Step = "home" | "beat" | "difficulty" | "scheme";
+type Step = "home" | "beat" | "difficulty" | "scheme" | "reto";
 
 export default function Home() {
   const router = useRouter();
@@ -25,6 +31,7 @@ export default function Home() {
     entitlements,
     checkSession,
     recordSessionStart,
+    daily,
   } = useAppStore();
   const BEAT_TRACKS = useBeatTracks();
   // Mode is hard-coded to clásico while the other three are hidden from the
@@ -34,6 +41,10 @@ export default function Home() {
   const [selectedDifficulty, setSelectedDifficulty] =
     useState<Difficulty>("principiante");
   const [selectedScheme, setSelectedScheme] = useState<RhymeScheme>("AABB");
+  const [selectedPromptKind, setSelectedPromptKind] =
+    useState<PromptKind>("palabras");
+  const [selectedModifier, setSelectedModifier] =
+    useState<SessionModifier>("ninguno");
   const [selectedBeatIdx, setSelectedBeatIdx] = useState(0);
   const [step, setStep] = useState<Step>("home");
   const [previewingIdx, setPreviewingIdx] = useState<number | null>(null);
@@ -93,6 +104,14 @@ export default function Home() {
       return;
     }
 
+    // Session modifiers (doble-tempo / sangre) are Pro-only. Gate after the
+    // entitlement check so free users still see the full reto picker and learn
+    // what Pro unlocks, rather than being blocked earlier.
+    if (selectedModifier !== "ninguno" && !isPro) {
+      router.push("/pro");
+      return;
+    }
+
     audioRef.current?.pause();
     audioRef.current = null;
     const beat = {
@@ -106,8 +125,42 @@ export default function Home() {
       bar1OffsetSec: t.bar1OffsetSec,
     };
     const wordPool = getWordsByDifficulty(selectedDifficulty);
-    startGame(selectedMode, selectedDifficulty, selectedScheme, beat, wordPool);
+    startGame(selectedMode, selectedDifficulty, selectedScheme, beat, wordPool, {
+      promptKind: selectedPromptKind,
+      modifier: selectedModifier,
+    });
     recordSessionStart(); // counts even if they bail — see store comment
+    router.push("/juego");
+  };
+
+  // Today's reto del día — deterministic, computed once per render cycle.
+  const challenge = useMemo(() => getTodayChallenge(), []);
+
+  // Start the reto del día. It's free and uncapped, so it deliberately skips
+  // checkSession / recordSessionStart. Builds the beat config exactly like
+  // handleStart and routes straight into the game.
+  const handleStartDaily = () => {
+    if (BEAT_TRACKS.length === 0) return;
+    const ch = getTodayChallenge();
+    const t = BEAT_TRACKS.find((b) => b.id === ch.beatId) ?? BEAT_TRACKS[0];
+
+    audioRef.current?.pause();
+    audioRef.current = null;
+    const beat = {
+      id: t.id,
+      name: t.name,
+      bpm: t.bpm,
+      style: t.style,
+      timeSignature: t.timeSignature ?? ("4/4" as const),
+      pattern: { kick: [], snare: [], hihat: [], openhat: [], perc: [], steps: 16 },
+      src: t.src,
+      bar1OffsetSec: t.bar1OffsetSec,
+    };
+    const wordPool = getWordsByDifficulty(ch.difficulty);
+    startGame("clasico", ch.difficulty, ch.scheme, beat, wordPool, {
+      promptKind: ch.promptKind,
+      isDaily: true,
+    });
     router.push("/juego");
   };
 
@@ -187,12 +240,51 @@ export default function Home() {
           </div>
         )}
 
+        {/* Reto del día — free, uncapped daily challenge. Deterministic per
+            calendar day; beat name resolved from the catalogue (falls back to
+            the first track, or undefined if none loaded yet). */}
+        <div className="mb-6">
+          <DailyCard
+            challenge={challenge}
+            daily={daily}
+            done={isDailyDoneToday(daily)}
+            beatName={
+              BEAT_TRACKS.find((b) => b.id === challenge.beatId)?.name ??
+              BEAT_TRACKS[0]?.name
+            }
+            onStart={handleStartDaily}
+          />
+        </div>
+
         <button
           onClick={() => setStep("beat")}
           className="w-full py-4 rounded-2xl btn-primary text-lg"
         >
           Siguiente &rsaquo;
         </button>
+
+        {/* Secondary nav: the soft-launch home has no tab bar, so surface the
+            other screens here as compact links. */}
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          <Link
+            href="/grabaciones"
+            className="card-dark rounded-xl py-3 text-center text-[11px] font-bold uppercase tracking-wider text-muted hover:text-accent transition-colors"
+          >
+            🎙️ Grabaciones
+          </Link>
+          <Link
+            href="/diccionario"
+            className="card-dark rounded-xl py-3 text-center text-[11px] font-bold uppercase tracking-wider text-muted hover:text-accent transition-colors"
+          >
+            📖 Rimas
+          </Link>
+          <Link
+            href="/perfil"
+            className="card-dark rounded-xl py-3 text-center text-[11px] font-bold uppercase tracking-wider text-muted hover:text-accent transition-colors"
+          >
+            📊 Perfil
+          </Link>
+        </div>
 
         {/* Web-only footer: the APK link makes no sense inside the app
             itself, and native nav already exposes legal links. */}
@@ -507,7 +599,8 @@ export default function Home() {
   }
 
   // RHYME SCHEME
-  return (
+  if (step === "scheme") {
+    return (
     <div className="app-screen flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto animate-slide-up">
       <div className="text-center mb-8">
         <h2 className="text-6xl font-display uppercase tracking-tight text-foreground">
@@ -585,6 +678,127 @@ export default function Home() {
       <div className="flex gap-3">
         <button
           onClick={() => setStep("difficulty")}
+          className="px-6 py-4 rounded-2xl card-dark font-bold uppercase tracking-wide text-sm"
+        >
+          &lsaquo;
+        </button>
+        <button
+          onClick={() => setStep("reto")}
+          className="flex-1 py-4 rounded-2xl btn-primary text-lg"
+        >
+          Siguiente &rsaquo;
+        </button>
+      </div>
+    </div>
+    );
+  }
+
+  // RETO (prompt kind + session modifier)
+  return (
+    <div className="app-screen flex flex-col px-4 pt-6 pb-6 max-w-lg mx-auto animate-slide-up">
+      <div className="text-center mb-8">
+        <h2 className="text-6xl font-display uppercase tracking-tight text-foreground">
+          Reto
+        </h2>
+        <p className="text-muted text-sm mt-2">¿Sobre qué se improvisa?</p>
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-6 mb-6">
+        {/* Prompt kind: what the changing banner asks for. */}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted px-1 mb-3">
+            🎯 Elegir el reto
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {(Object.keys(PROMPT_KIND_CONFIG) as PromptKind[]).map((kind) => {
+              const cfg = PROMPT_KIND_CONFIG[kind];
+              const selected = selectedPromptKind === kind;
+              return (
+                <button
+                  key={kind}
+                  onClick={() => setSelectedPromptKind(kind)}
+                  className={`p-3 rounded-2xl text-left transition-all card-dark ${
+                    selected ? "card-selected" : "hover:border-white/10"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg" aria-hidden>
+                      {cfg.icon}
+                    </span>
+                    <span className="font-bold uppercase tracking-wide text-xs">
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted mt-1 leading-snug">
+                    {cfg.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Session modifier: reshapes tempo/beat. Pro-only beyond 'ninguno'. */}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted px-1 mb-3">
+            ⚙️ Modo de sesión
+          </p>
+          <div className="space-y-2">
+            {(Object.keys(MODIFIER_CONFIG) as SessionModifier[]).map((mod) => {
+              const cfg = MODIFIER_CONFIG[mod];
+              const proOnly = mod !== "ninguno";
+              const locked = proOnly && !isPro;
+              const selected = selectedModifier === mod;
+              return (
+                <button
+                  key={mod}
+                  onClick={() => {
+                    // Pro-only modifiers route to the paywall instead of
+                    // selecting; 'ninguno' is free and selectable.
+                    if (locked) {
+                      router.push("/pro");
+                      return;
+                    }
+                    setSelectedModifier(mod);
+                  }}
+                  className={`w-full p-4 rounded-2xl text-left transition-all card-dark ${
+                    selected ? "card-selected" : "hover:border-white/10"
+                  } ${locked ? "ring-1 ring-accent/20" : ""}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg" aria-hidden>
+                      {cfg.icon}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold uppercase tracking-wide text-sm flex items-center gap-1.5">
+                        {cfg.label}
+                        {locked && (
+                          <span
+                            className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-accent/15 text-accent"
+                            title="Disponible con Pro"
+                          >
+                            ★ Pro
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted mt-0.5">
+                        {cfg.description}
+                      </p>
+                    </div>
+                    {selected && (
+                      <div className="w-3 h-3 rounded-full bg-accent animate-glow-pulse" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={() => setStep("scheme")}
           className="px-6 py-4 rounded-2xl card-dark font-bold uppercase tracking-wide text-sm"
         >
           &lsaquo;

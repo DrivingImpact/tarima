@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
+import { computeStats } from "@/lib/stats";
 
 const ACHIEVEMENT_ICONS: Record<string, string> = {
   trophy: "🏆",
@@ -26,7 +27,8 @@ const ACHIEVEMENT_ICONS: Record<string, string> = {
 const HIDDEN_MODES = new Set(["toque", "barras-infinitas", "generador"]);
 
 export default function PerfilPage() {
-  const { progress } = useAppStore();
+  const { progress, daily } = useAppStore();
+  const stats = computeStats(progress, daily);
 
   const visibleAchievements = progress.achievements.filter((a) => {
     if (a.requirement.type !== "mode") return true;
@@ -93,6 +95,84 @@ export default function PerfilPage() {
           </p>
         </div>
       </div>
+
+      {progress.totalSessions > 0 && (
+        <>
+          <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted mb-3">
+            Estadísticas
+          </p>
+          <p className="text-[10px] text-muted/70 mb-3 leading-relaxed">
+            Volumen y variedad de entrenamiento. No se mide la calidad del
+            freestyle, solo lo practicado.
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="card-dark rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-accent">
+                {stats.palabrasEntrenadas}
+              </p>
+              <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                Palabras Entrenadas
+              </p>
+            </div>
+            <div className="card-dark rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-foreground">
+                {stats.tiempoTotal}
+              </p>
+              <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                Tiempo Total
+              </p>
+            </div>
+            <div className="card-dark rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-foreground">
+                {stats.esquemas.practicados}
+                <span className="text-sm text-muted">/{stats.esquemas.total}</span>
+              </p>
+              <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                Esquemas
+              </p>
+            </div>
+            <div className="card-dark rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-foreground">
+                {stats.tiposPrompt.practicados}
+                <span className="text-sm text-muted">
+                  /{stats.tiposPrompt.total}
+                </span>
+              </p>
+              <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                Tipos de Reto
+              </p>
+            </div>
+            <div className="card-dark rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-foreground">
+                {stats.rangoBpm
+                  ? `${stats.rangoBpm.min}–${stats.rangoBpm.max}`
+                  : "—"}
+              </p>
+              <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                Rango BPM
+              </p>
+            </div>
+            <div className="card-dark rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-accent">
+                {stats.retoRacha}
+              </p>
+              <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                Racha Reto 🔥
+              </p>
+            </div>
+          </div>
+
+          <div className="card-dark rounded-2xl p-4 text-center mb-8">
+            <p className="text-2xl font-black text-foreground">
+              {stats.mejorReto}
+            </p>
+            <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+              Mejor Reto del Día (barras)
+            </p>
+          </div>
+        </>
+      )}
 
       <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted mb-3">
         Logros ({unlocked.length}/{visibleAchievements.length})
