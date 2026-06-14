@@ -290,8 +290,11 @@ export default function Home() {
             itself, and native nav already exposes legal links. */}
         {mounted && !isNative() && (
           <div className="mt-8 text-center space-y-3">
+            {/* Pinned to the explicit version: GitHub's /releases/latest/
+                download/ redirect is CDN-cached and can lag for a while after a
+                new release. Bump this URL when cutting a new release. */}
             <a
-              href="https://github.com/DrivingImpact/tarima/releases/latest/download/app-release.apk"
+              href="https://github.com/DrivingImpact/tarima/releases/download/v1.4.1/app-release.apk"
               className="inline-block text-[11px] font-bold uppercase tracking-[0.2em] px-4 py-2 rounded-full border border-accent/40 text-accent hover:bg-accent/10 transition-colors"
             >
               ⤓ Descargar para Android (APK)
