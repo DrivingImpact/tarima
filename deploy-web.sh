@@ -19,4 +19,4 @@ fi
 npx vercel pull --yes --environment=production
 npx vercel build --prod
 npx vercel deploy --prebuilt --prod
-echo "✓ Deployed. Verify a beat: curl -sI https://tarima-tau.vercel.app/beats-v2/aspieduck-1-weirdo.mp3"
+echo "✓ Deployed. Verify a beat: curl -sI https://tarima-tau.vercel.app/beats-v2/raro.mp3"

@@ -47,64 +47,64 @@ export const BEAT_TRACKS: BeatTrack[] = [
   // Boom-bap (slow→mid), old-school west-coast, and a jazz-hop / soul flavour
   // so the breadth is obvious from the first listen.
   {
-    id: 'darren-hirst-minimal-90s', name: 'Sótano',
+    id: 'sotano', name: 'Sótano',
     style: 'boom-bap', tags: ['boom-bap', '90s', 'minimal'], bpm: 81,
-    src: '/beats-v2/darren-hirst-minimal-90s.mp3',
+    src: '/beats-v2/sotano.mp3',
   },
   {
-    id: 'aspieduck-1-weirdo', name: 'Raro',
+    id: 'raro', name: 'Raro',
     style: 'boom-bap', tags: ['boom-bap', 'old-school'], bpm: 92,
     bar1OffsetSec: 2.02,
-    src: '/beats-v2/aspieduck-1-weirdo.mp3',
+    src: '/beats-v2/raro.mp3',
   },
   {
-    id: 'alexgrohl-sad-soul', name: 'Humo',
+    id: 'humo', name: 'Humo',
     style: 'jazz-hop', tags: ['jazz-hop', 'soul', 'mellow'], bpm: 92,
     bar1OffsetSec: 14.63,
-    src: '/beats-v2/alexgrohl-sad-soul.mp3',
+    src: '/beats-v2/humo.mp3',
   },
   {
-    id: 'doublehmajor-westcoast-90s', name: 'Costa',
+    id: 'costa', name: 'Costa',
     style: 'old-school', tags: ['old-school', 'west-coast', 'g-funk'], bpm: 99,
-    src: '/beats-v2/doublehmajor-westcoast-90s.mp3',
+    src: '/beats-v2/costa.mp3',
   },
 
   {
-    id: 'pasabaa-anantha-pernel', name: 'Pulso',
+    id: 'pulso', name: 'Pulso',
     style: 'boom-bap', tags: ['boom-bap', 'modern'], bpm: 89,
-    src: '/beats-v2/pasabaa-anantha-pernel.mp3',
+    src: '/beats-v2/pulso.mp3',
   },
   {
-    id: 'delosound-old-school', name: 'Cinta',
+    id: 'cinta', name: 'Cinta',
     style: 'boom-bap', tags: ['boom-bap', 'old-school'], bpm: 86,
     // librosa returned 172.3 → halved (boom-bap convention; 172 is the
     // double-time hi-hat read, not the bar pulse).
-    src: '/beats-v2/delosound-old-school.mp3',
+    src: '/beats-v2/cinta.mp3',
   },
   {
-    id: 'sound4stock-urban', name: 'Asfalto',
+    id: 'asfalto', name: 'Asfalto',
     style: 'boom-bap', tags: ['boom-bap', 'urban'], bpm: 89,
-    src: '/beats-v2/sound4stock-urban.mp3',
+    src: '/beats-v2/asfalto.mp3',
   },
   {
-    id: 'vxyage-territory', name: 'Sombra',
+    id: 'sombra', name: 'Sombra',
     style: 'boom-bap', tags: ['boom-bap', 'dark', 'horrorcore'], bpm: 99,
-    src: '/beats-v2/vxyage-territory.mp3',
+    src: '/beats-v2/sombra.mp3',
   },
   {
-    id: 'yellowbirdbeats-back-right', name: 'Batalla',
+    id: 'batalla', name: 'Batalla',
     style: 'boom-bap', tags: ['boom-bap', 'battle', 'freestyle'], bpm: 86,
     bar1OffsetSec: 1.51,
     // librosa returned 172.3 → halved; battle/freestyle context confirms
     // the slower bar pulse.
-    src: '/beats-v2/yellowbirdbeats-back-right.mp3',
+    src: '/beats-v2/batalla.mp3',
   },
   {
-    id: 'jake-plah-freestyle', name: 'Lento',
+    id: 'lento', name: 'Lento',
     style: 'boom-bap', tags: ['boom-bap', 'freestyle', 'slow'], bpm: 76,
     // librosa returned 152 → halved. 76 fits the slow-warmup freestyle
     // pocket; if it's actually 152 trap, flip back and update the style.
-    src: '/beats-v2/jake-plah-freestyle.mp3',
+    src: '/beats-v2/lento.mp3',
   },
 ];
 
