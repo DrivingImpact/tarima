@@ -85,11 +85,14 @@ Play. Dark frames to match the UI.
 
 ## Privacy (App Privacy "nutrition" labels)
 
-Matches the Play data-safety answers in `security-usability-audit.md`:
-- App itself: **no data collected** (all progress is on-device).
-- Once `NEXT_PUBLIC_RC_IOS_KEY` is live, RevenueCat collects **Purchase
-  History** + an anonymous device identifier → declare *Purchases* and
-  *Identifiers*, "not linked to identity", not used for tracking.
+Matches the Play data-safety answers in `play-console-forms.md`:
+- App progress: **not collected** (all on-device localStorage).
+- If `NEXT_PUBLIC_APTABASE_KEY` is set (anonymous analytics on): declare **Usage
+  Data → Product Interaction**, "not linked to identity", **not** used for
+  tracking. Anonymous, no ad id, no cross-app tracking.
+- Once `NEXT_PUBLIC_RC_IOS_KEY` is live, RevenueCat collects **Purchases** +
+  an anonymous device identifier → declare *Purchases* and *Identifiers*, "not
+  linked to identity", not used for tracking.
 - Microphone: recordings never leave the device — declare no audio collection.
 
 ## In-app purchases (Tarima Pro on iOS)

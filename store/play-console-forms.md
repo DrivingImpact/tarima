@@ -60,7 +60,10 @@ content — nothing to declare.
 This keeps you out of the Designed for Families programme.
 
 ## 5. Data safety form
-This is the big one. For the **current** shipped build (billing off):
+This is the big one. The answer depends on whether **anonymous analytics** is
+enabled in the build you ship (`NEXT_PUBLIC_APTABASE_KEY` set or not).
+
+**If you ship WITHOUT an Aptabase key (analytics off):**
 
 **Does your app collect or share any of the required user data types?**
 → **No.**
@@ -69,8 +72,18 @@ Justification you can keep on file (matches `store/security-usability-audit.md`)
 - All progress, streaks, achievements and the Pro flag live in `localStorage`
   on the device only (`tarima-storage`). Nothing is sent to a server.
 - The only Android permission is **INTERNET**, used solely to fetch bundled
-  static assets; there is no analytics SDK, no crash SDK, no account system.
+  static assets; with no key there is no analytics SDK active, no crash SDK,
+  no account system.
 - No advertising ID, no location, no contacts, no personal identifiers.
+
+**If you ship WITH an Aptabase key (analytics on) — declare it:**
+- **App activity → App interactions** — Collected, not shared. Purpose:
+  Analytics. Anonymous (Aptabase): no name, no email, no advertising id, no
+  cross-app tracking. Events are aggregate signals like "app opened" /
+  "session completed". Mark as **not** used for tracking and **not** linked to
+  identity.
+- Everything else above still holds (no location, no contacts, voice
+  recordings never leave the device).
 
 **Is all user data encrypted in transit?**
 → Yes (assets served over HTTPS). N/A for collected data since none is
@@ -89,7 +102,7 @@ Safety to declare:
   (manage the Pro entitlement). Processed by RevenueCat as a service provider.
 - **Device or other IDs** — RevenueCat assigns an anonymous app-user ID /
   reads an app-set ID. Collected, not shared. Purpose: App functionality.
-- Still: no name, no email, no location, no analytics.
+- Still: no name, no email, no location.
 - RevenueCat's data handling: they act as a processor; link their privacy terms
   in your policy when you enable billing.
 

@@ -52,7 +52,18 @@ export default function PrivacyPage() {
         <Section title="Qué NO se recopila">
           No se piden ni se recopilan nombre, correo, contactos, ubicación,
           fotos ni identificadores publicitarios. La aplicación no incluye
-          anuncios ni rastreadores de terceros.
+          anuncios ni rastreadores publicitarios de terceros.
+        </Section>
+
+        <Section title="Estadísticas anónimas de uso">
+          Para entender cómo se usa la aplicación (por ejemplo, cuántas personas
+          vuelven a entrenar al día siguiente) se registran eventos anónimos y
+          agregados mediante Aptabase, un servicio de analítica que respeta la
+          privacidad. No se asocia ningún dato personal: no hay nombre, correo,
+          ni identificador publicitario, y no se rastrea a la persona entre
+          aplicaciones ni sitios. Solo se envían señales agregadas como “se abrió
+          la app” o “se completó una sesión”. Las grabaciones de voz nunca se
+          envían y permanecen en el dispositivo.
         </Section>
 
         <Section title="Compras">
