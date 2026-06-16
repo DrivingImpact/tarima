@@ -1,0 +1,8 @@
+handle,platform,followers,tier,country,code,dm_sent,replied,posted,installs_est,notes
+# Fill 50 micro freestyle creators (1k-50k) first — tier 1 is 80% of effort.
+# Find them: search TikTok/IG for "freestyle", "plaza", "FMS", "batalla de gallos",
+# "rap improvisado" + city tags (Madrid, Buenos Aires, CDMX, Bogota, Santiago, Lima).
+# Also: comment sections of big freestyle clips, regional battle league accounts.
+# code = TARIMA-<HANDLE>. Update dm_sent/replied/posted as you go. installs_est
+# from the redeem-code attribution once live.
+@example_handle,tiktok,12000,1,AR,TARIMA-EXAMPLE,no,no,no,,plaza kid, good engagement
