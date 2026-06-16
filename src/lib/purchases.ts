@@ -2,38 +2,58 @@
 
 /**
  * Purchases — thin, platform-aware wrapper over RevenueCat (Google Play
- * Billing on Android). Web builds never touch RevenueCat; the /pro page keeps
- * its Stripe-link path there. Native builds (Capacitor) drive real Play
- * subscriptions through here.
+ * Billing on Android, StoreKit on iOS). Web builds never touch RevenueCat; the
+ * /pro page keeps its Stripe-link path there. Native builds (Capacitor) drive
+ * real store subscriptions through here.
  *
  * Setup needed before this works end-to-end (see the launch checklist):
- *   1. RevenueCat project → add the Android app (package com.tarima.freestyle).
- *   2. Create Play Console subscriptions (suggested product IDs):
+ *   1. RevenueCat project → add the Android app (package com.tarima.freestyle)
+ *      and the iOS app (bundle id com.tarima.freestyle).
+ *   2. Create the store subscriptions (same product IDs on both stores):
  *        tarima_pro_monthly, tarima_pro_yearly
  *      and attach them to a RevenueCat Offering "default" with packages
  *      $rc_monthly / $rc_annual.
- *   3. Create an Entitlement "pro" and attach both products.
- *   4. Put the RevenueCat *Android public SDK key* in env:
+ *   3. Create one Entitlement "pro" and attach both products (shared across
+ *      platforms).
+ *   4. Put each platform's RevenueCat *public SDK key* in env:
  *        NEXT_PUBLIC_RC_ANDROID_KEY=goog_xxx
+ *        NEXT_PUBLIC_RC_IOS_KEY=appl_xxx
  *
- * Until the key is set, native falls back to "billing unavailable" (the UI
- * shows the same coming-soon path as web), so nothing 404s mid-upgrade.
+ * Until a platform's key is set, native falls back to "billing unavailable"
+ * (the UI shows the same coming-soon path as web), so nothing 404s mid-upgrade.
  */
 
 import { Capacitor } from "@capacitor/core";
 import type { PurchasesPackage } from "@revenuecat/purchases-capacitor";
 
 const ANDROID_KEY = process.env.NEXT_PUBLIC_RC_ANDROID_KEY ?? "";
+const IOS_KEY = process.env.NEXT_PUBLIC_RC_IOS_KEY ?? "";
 const ENTITLEMENT_ID = "pro";
+
+/** The RevenueCat public SDK key for the current native platform ("" on web or
+ *  when that platform's key isn't configured yet). Android uses a `goog_…` key,
+ *  iOS an `appl_…` key — they are separate apps in RevenueCat sharing the same
+ *  "pro" entitlement. */
+function platformKey(): string {
+  switch (Capacitor.getPlatform()) {
+    case "android":
+      return ANDROID_KEY;
+    case "ios":
+      return IOS_KEY;
+    default:
+      return "";
+  }
+}
 
 /** True inside the Capacitor native shell (Android/iOS), false on the web. */
 export function isNative(): boolean {
   return Capacitor.isNativePlatform();
 }
 
-/** True when native billing is actually configured (native + key present). */
+/** True when native billing is actually configured (native + a key for this
+ *  platform present). */
 export function billingAvailable(): boolean {
-  return isNative() && ANDROID_KEY.length > 0;
+  return isNative() && platformKey().length > 0;
 }
 
 let configured = false;
@@ -43,7 +63,7 @@ export async function initPurchases(): Promise<void> {
   if (!billingAvailable() || configured) return;
   const { Purchases, LOG_LEVEL } = await import("@revenuecat/purchases-capacitor");
   await Purchases.setLogLevel({ level: LOG_LEVEL.WARN });
-  await Purchases.configure({ apiKey: ANDROID_KEY });
+  await Purchases.configure({ apiKey: platformKey() });
   configured = true;
 }
 
