@@ -4,6 +4,7 @@ import { DesktopFrame } from "@/components/DesktopFrame";
 import { PurchasesInit } from "@/components/PurchasesInit";
 import { AppUpdater } from "@/components/AppUpdater";
 import { NativeChrome } from "@/components/NativeChrome";
+import { RetentionInit } from "@/components/RetentionInit";
 import "./globals.css";
 
 // Type system — "Acid Underground":
@@ -67,6 +68,7 @@ export default function RootLayout({
         <PurchasesInit />
         <AppUpdater />
         <NativeChrome />
+        <RetentionInit />
         <DesktopFrame>{children}</DesktopFrame>
       </body>
     </html>

@@ -23,6 +23,7 @@ const VOCAB_CAP = 3000;
 const DAILY_HISTORY_CAP = 30;
 import { generateRound, calculateScore } from './game-engine';
 import type { BeatTrack } from './beat-tracks';
+import { initialMeta, recordOpen, type MetaState } from './retention';
 import {
   canStartSession,
   rollUsage,
@@ -219,6 +220,9 @@ interface AppStore {
   // ── Daily challenge state (persisted) ──
   daily: DailyState;
 
+  // ── Retention / review meta (persisted, on-device only) ──
+  meta: MetaState;
+
   // ── Actions ──
   startGame: (
     mode: GameMode,
@@ -271,6 +275,14 @@ interface AppStore {
    *  home page right after `startGame` so a paused/abandoned session still
    *  counts (otherwise free users get unlimited retries by quitting). */
   recordSessionStart: () => void;
+
+  // ── Retention / review meta ──
+  /** Record that the app was opened today (local date). Sets first-open on the
+   *  first ever call; dedups within a day. Drives D1/D7 cohort inputs and the
+   *  review-prompt gate. On-device only. */
+  recordAppOpen: () => void;
+  /** Flag that the native review sheet has been requested (we ask once). */
+  markReviewPrompted: () => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -392,6 +404,7 @@ export const useAppStore = create<AppStore>()(
       entitlements: { ...initialEntitlements },
       recordings: [],
       daily: { ...initialDaily },
+      meta: { ...initialMeta },
 
       // ── Game actions ──
 
@@ -806,6 +819,16 @@ export const useAppStore = create<AppStore>()(
           };
         });
       },
+
+      // ── Retention / review meta ──
+
+      recordAppOpen: () => {
+        set((state) => ({ meta: recordOpen(state.meta, todayStr()) }));
+      },
+
+      markReviewPrompted: () => {
+        set((state) => ({ meta: { ...state.meta, reviewPrompted: true } }));
+      },
     }),
     {
       name: 'tarima-storage',
@@ -819,6 +842,7 @@ export const useAppStore = create<AppStore>()(
         entitlements: state.entitlements,
         recordings: state.recordings,
         daily: state.daily,
+        meta: state.meta,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<AppStore>;
@@ -838,6 +862,7 @@ export const useAppStore = create<AppStore>()(
           },
           recordings: p.recordings ?? current.recordings,
           daily: { ...current.daily, ...p.daily },
+          meta: { ...current.meta, ...p.meta },
           entitlements: {
             ...current.entitlements,
             ...p.entitlements,
